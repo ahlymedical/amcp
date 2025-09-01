@@ -6,18 +6,19 @@ import google.generativeai as genai
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import logging
+import re
 
-# --- إعدادات أساسية ---
-app = Flask(__name__, static_folder='static', static_url_path='')
+# --- Basic Setup ---
+app = Flask(__name__, static_folder=None) # No static folder from Flask
 CORS(app)
 logging.basicConfig(level=logging.INFO)
 
-# --- ذاكرة التخزين المؤقت للبيانات لضمان السرعة (Cache) ---
+# --- Data Caching for Speed ---
 NETWORK_DATA_CACHE = None
 
 def get_network_data():
     """
-    تقوم بقراءة بيانات الشبكة من ملف الإكسل مرة واحدة فقط وتحفظها في الذاكرة لضمان السرعة.
+    Reads network data from the Excel file only once and caches it for speed.
     """
     global NETWORK_DATA_CACHE
     if NETWORK_DATA_CACHE is not None:
@@ -27,145 +28,225 @@ def get_network_data():
     excel_file_path = os.path.join(basedir, 'network_data.xlsx')
     
     if not os.path.exists(excel_file_path):
-        app.logger.error(f"خطأ فادح: ملف الإكسل '{excel_file_path}' غير موجود.")
-        return []
+        app.logger.error(f"FATAL ERROR: Excel file '{excel_file_path}' not found.")
+        return pd.DataFrame() # Return empty dataframe
 
     try:
-        # قراءة الأعمدة المطلوبة فقط من ملف الإكسل بأسمائها العربية
-        df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0, usecols=[
-            'المنطقة', 'التخصص الرئيسي', 'التخصص الفرعي', 'اسم مقدم الخدمة', 
-            'عنوان مقدم الخدمة', 'Telephone1', 'Telephone2', 'Telephone3', 'Telephone4', 'Hotline'
-        ])
-        df.dropna(how='all', inplace=True)
-        df.dropna(subset=['المنطقة', 'اسم مقدم الخدمة'], inplace=True)
-        df = df.astype(str).replace('nan', '')
-
-        data_list = []
-        for index, row in df.iterrows():
-            phones = [
-                str(row[col]).replace('.0', '').strip() for col in ['Telephone1', 'Telephone2', 'Telephone3', 'Telephone4']
-                if col in row and str(row[col]).replace('.0', '').strip() not in ['0', '']
-            ]
-            hotline = str(row['Hotline']).replace('.0', '').strip() if 'Hotline' in row and str(row['Hotline']).replace('.0', '').strip() not in ['0', ''] else None
-            
-            item = {
-                'governorate': row['المنطقة'],
-                'provider_type': row['التخصص الرئيسي'],
-                'specialty_sub': row['التخصص الفرعي'],
-                'name': row['اسم مقدم الخدمة'],
-                'address': row['عنوان مقدم الخدمة'],
-                'phones': phones,
-                'hotline': hotline,
-                'id': f"row-{index}"
-            }
-            data_list.append(item)
-        
-        NETWORK_DATA_CACHE = data_list
-        app.logger.info(f"نجحت العملية! تم تحميل {len(NETWORK_DATA_CACHE)} سجل من ملف الإكسل إلى الذاكرة.")
+        df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0)
+        # Clean column names
+        df.columns = [str(col).strip() for col in df.columns]
+        # Convert all data to strings to avoid type issues and fill NaNs
+        NETWORK_DATA_CACHE = df.astype(str).fillna('')
+        app.logger.info("Successfully loaded and cached network_data.xlsx.")
         return NETWORK_DATA_CACHE
     except Exception as e:
-        app.logger.error(f"حدث خطأ فادح أثناء قراءة ملف الإكسل: {e}", exc_info=True)
-        return []
+        app.logger.error(f"Error reading Excel file: {e}", exc_info=True)
+        return pd.DataFrame()
 
-# --- Endpoints الخاصة بالتطبيق ---
+# --- Gemini AI Model Configuration ---
+def configure_genai():
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        app.logger.warning("GEMINI_API_KEY environment variable not set.")
+        return None
+    try:
+        genai.configure(api_key=api_key)
+        return genai.GenerativeModel('gemini-1.5-flash')
+    except Exception as e:
+        app.logger.error(f"Error configuring GenerativeAI: {e}")
+        return None
+
+model = configure_genai()
+
+def clean_json_response(text):
+    """
+    Cleans the Gemini response to extract a valid JSON object.
+    """
+    match = re.search(r'\{.*\}', text, re.DOTALL)
+    if match:
+        return match.group(0)
+    return text.strip().replace("```json", "").replace("```", "")
+
+
+# --- API Endpoints ---
+
 @app.route('/')
 def serve_index():
-    """ يعرض الصفحة الرئيسية. """
-    return send_from_directory('static', 'index.html')
+    return send_from_directory('.', 'index.html')
 
-@app.route("/api/symptoms-search", methods=["POST"])
-def symptoms_search():
+
+@app.route('/api/search-by-symptoms', methods=['POST'])
+def search_by_symptoms():
     """
-    محرك البحث الذكي الرئيسي: يحلل الأعراض والموقع، ويرشح أفضل مقدمي الخدمة.
+    Handles search by natural language query (symptoms and location).
     """
+    if not model:
+        return jsonify({"error": "AI model is not configured"}), 500
+
     try:
         data = request.get_json()
-        symptoms = data.get('symptoms')
-        location = data.get('location')
-        if not (symptoms and location):
-            return jsonify({"error": "Symptoms or location are missing"}), 400
+        query = data.get('query')
+        if not query:
+            return jsonify({"error": "Query is required"}), 400
 
-        network_data = get_network_data()
-        if not network_data:
-            return jsonify({"error": "Network data not available"}), 500
-        
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            return jsonify({"error": "Server configuration error."}), 500
+        network_df = get_network_data()
+        if network_df.empty:
+            return jsonify({"error": "Network data is unavailable"}), 500
 
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-
+        # Step 1: Use AI to parse the user's query
         prompt = f"""
-        أنت نظام ترشيح طبي ذكي وخبير. مهمتك هي مساعدة مريض بناءً على أعراضه وموقعه الجغرافي.
+            Analyze the following user query to identify medical symptoms, location, and the most relevant medical specialty.
+            The user query is: "{query}"
 
-        قاعدة البيانات المتاحة (عينة صغيرة للتوضيح، عليك البحث في كامل البيانات):
-        {json.dumps(network_data[:150], ensure_ascii=False, indent=2)}
+            Provide your response as a JSON object with three keys:
+            1.  `location_terms`: An array of strings containing location keywords (city, district, neighborhood, etc.) found in the query. Example: ["الطالبية", "هرم", "الجيزة"].
+            2.  `symptoms`: A brief string summarizing the user's symptoms. Example: "إرهاق عام وصداع شديد".
+            3.  `specialty`: A single string for the most appropriate medical specialty. Example: "باطنة" or "مخ وأعصاب".
 
-        أعراض المريض: "{symptoms}"
-        موقع المريض: "{location}"
-        
-        المطلوب منك تنفيذ المهام التالية بدقة شديدة:
-        1.  **استنتاج التخصص**: بناءً على الأعراض، استنتج "التخصص الرئيسي" (provider_type) الأنسب.
-        2.  **فهم الموقع والفلترة**: افهم موقع المريض بمرونة (مثال: "الطالبية هرم" تعني محافظة "الجيزة"). ابحث في **كامل** قاعدة البيانات عن **كل** مقدمي الخدمة الذين يتطابقون مع التخصص الذي استنتجته والمحافظة ("المنطقة" أو governorate) التي فهمتها.
-        3.  **اختيار الترشيح الأنسب**: من النتائج التي وجدتها، اختر **مقدم خدمة واحد فقط** ليكون "الترشيح الأنسب" (best_match). اختره بناءً على اكتمال بياناته (وجود هواتف وعنوان واضح).
-        4.  **كتابة نصيحة طبية احترافية**: اكتب نصيحة طبية أولية ومؤقتة (initial_advice) للمريض كأنك طبيب محترف، بناءً على الأعراض، مع التأكيد على ضرورة زيارة الطبيب المختص.
-        5.  **الإخراج النهائي**: أعد النتائج على هيئة ملف JSON **فقط**، بدون أي نصوص قبله أو بعده، ويجب أن يحتوي على الحقول التالية بالترتيب:
-            - `initial_advice`: (String) النصيحة الطبية المؤقتة والاحترافية.
-            - `best_match`: قائمة تحتوي على **عنصر واحد فقط** وهو "الترشيح الأنسب".
-            - `other_results`: قائمة تحتوي على **باقي** النتائج المطابقة.
-
-        إذا لم تجد أي نتائج مطابقة، أعد القوائم `best_match` و `other_results` فارغة.
+            Example for "انا من الطالبية هرم، وأشعر بإرهاق عام وصداع شديد":
+            {{
+                "location_terms": ["الطالبية", "هرم"],
+                "symptoms": "إرهاق عام وصداع شديد",
+                "specialty": "باطنة"
+            }}
+            
+            Return ONLY the JSON object.
         """
         response = model.generate_content(prompt)
-        cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
-        return jsonify(json.loads(cleaned_text))
+        parsed_info = json.loads(clean_json_response(response.text))
+        
+        app.logger.info(f"AI Parsed Info: {parsed_info}")
+
+        location_terms = parsed_info.get("location_terms", [])
+        specialty = parsed_info.get("specialty", "")
+
+        # Step 2: Filter the DataFrame based on AI analysis
+        filtered_df = network_df
+        if location_terms:
+            # Create a regex pattern to search for any of the location terms in the 'المنطقة' column
+            location_regex = '|'.join(map(re.escape, location_terms))
+            filtered_df = filtered_df[filtered_df['المنطقة'].str.contains(location_regex, case=False, na=False)]
+
+        if specialty:
+            # Search in both main and sub specialty columns
+            specialty_regex = re.escape(specialty)
+            filtered_df = filtered_df[
+                filtered_df['التخصص الرئيسي'].str.contains(specialty_regex, case=False, na=False) |
+                filtered_df['التخصص الفرعي'].str.contains(specialty_regex, case=False, na=False)
+            ]
+
+        if filtered_df.empty:
+            return jsonify([])
+
+        results = filtered_df.head(20).to_dict('records') # Limit results
+
+        # Step 3: Use AI to recommend the best provider from the filtered list
+        if len(results) > 1:
+            providers_text = "\n".join([f"- {r.get('اسم مقدم الخدمة', '')}, التخصص: {r.get('التخصص الرئيسي', '')}" for r in results])
+            
+            recommend_prompt = f"""
+                Based on the user's symptoms: "{parsed_info.get('symptoms', 'N/A')}",
+                and from the following list of medical providers, which one is the most suitable recommendation?
+
+                Providers List:
+                {providers_text}
+
+                Your task: Return only the exact full name (string) of the single best provider from the list. Do not add any extra text.
+            """
+            recommend_response = model.generate_content(recommend_prompt)
+            recommended_name = recommend_response.text.strip()
+            
+            app.logger.info(f"AI Recommended Provider: {recommended_name}")
+
+            # Mark the recommended provider
+            for r in results:
+                if r.get('اسم مقدم الخدمة') == recommended_name:
+                    r['is_recommended'] = True
+                else:
+                    r['is_recommended'] = False
+        elif len(results) == 1:
+            results[0]['is_recommended'] = True
+
+        return jsonify(results)
 
     except Exception as e:
-        app.logger.error(f"ERROR in /api/symptoms-search: {e}", exc_info=True)
-        return jsonify({"error": "حدث خطأ داخلي أثناء البحث الذكي."}), 500
+        app.logger.error(f"ERROR in /api/search-by-symptoms: {e}", exc_info=True)
+        return jsonify({"error": "An internal error occurred during search"}), 500
 
-@app.route("/api/analyze", methods=["POST"])
-def analyze_report():
+
+@app.route('/api/analyze-and-recommend', methods=['POST'])
+def analyze_and_recommend():
     """
-    يحلل التقارير الطبية المرفوعة ويقدم شرحاً وتوصيات احترافية.
+    Analyzes medical reports, provides advice, and recommends providers for the suggested specialty.
     """
+    if not model:
+        return jsonify({"error": "AI model is not configured"}), 500
+
     try:
         data = request.get_json()
-        files_payload = data.get('files')
+        files_payload = data.get('files', [])
         if not files_payload:
             return jsonify({"error": "No files provided for analysis"}), 400
-
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            return jsonify({"error": "Server configuration error."}), 500
-
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-
+        
+        # Step 1: Use AI to analyze the files
         prompt_parts = [
-            f"""
-            أنت طبيب استشاري خبير في تحليل كافة أنواع التقارير الطبية.
-            المهمة: قم بتحليل الملفات المرفقة بدقة شديدة وقدم إجابة احترافية ومنظمة على هيئة ملف JSON فقط.
-            التحليل المطلوب يجب أن يحتوي على:
-            1.  `interpretation`: شرح مبسط وواضح ومفصل لما يظهر في التقرير بأسلوب طبي احترافي.
-            2.  `temporary_advice`: قائمة (array of strings) بالنصائح والإرشادات الأولية الهامة التي يجب على المريض اتباعها بشكل مؤقت.
-            3.  `recommended_specialty`: (String) اسم التخصص الطبي الدقيق الموصى بزيارته.
-            تنبيه هام: يجب أن تؤكد في شرحك على أن هذا التحليل هو مجرد إرشاد أولي ولا يغني إطلاقًا عن استشارة الطبيب.
+            """
+            You are an expert consultant physician analyzing various medical reports.
+            Task: Thoroughly analyze the attached files and provide a professional, structured response as a single JSON object ONLY.
+            The analysis must contain:
+            1.  `interpretation`: A simple, clear, and detailed explanation of the report's findings in a professional medical style.
+            2.  `temporary_advice`: An array of strings with important initial advice and instructions for the patient to follow temporarily.
+            3.  `recommended_specialty`: A single string with the name of the precise medical specialty recommended for a visit (e.g., "قلب وأوعية دموية", "جهاز هضمي", "عظام").
+            
+            Important Note: You must emphasize in your interpretation that this analysis is preliminary guidance and not a substitute for a doctor's consultation.
             """
         ]
         for file_data in files_payload:
-            prompt_parts.append({"mime_type": file_data['mime_type'], "data": file_data['data']})
+            # Decode base64 data
+            prompt_parts.append({"mime_type": file_data['mime_type'], "data": base64.b64decode(file_data['data'])})
             
         response = model.generate_content(prompt_parts)
-        cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
-        return jsonify(json.loads(cleaned_text))
+        analysis_result = json.loads(clean_json_response(response.text))
+
+        app.logger.info(f"AI Analysis Result: {analysis_result}")
+        
+        # Step 2: Find providers based on the recommended specialty
+        recommended_specialty = analysis_result.get('recommended_specialty')
+        providers = []
+        if recommended_specialty:
+            network_df = get_network_data()
+            if not network_df.empty:
+                specialty_regex = re.escape(recommended_specialty)
+                # Search for specialty in both main and sub-specialty columns
+                filtered_df = network_df[
+                    network_df['التخصص الرئيسي'].str.contains(specialty_regex, case=False, na=False) |
+                    network_df['التخصص الفرعي'].str.contains(specialty_regex, case=False, na=False)
+                ]
+                
+                providers_results = filtered_df.head(10).to_dict('records') # Limit results
+                
+                # Mark the first one as recommended by default in this case
+                if providers_results:
+                    providers_results[0]['is_recommended'] = True
+                    for i in range(1, len(providers_results)):
+                        providers_results[i]['is_recommended'] = False
+                providers = providers_results
+
+
+        final_response = {
+            "analysis": analysis_result,
+            "providers": providers
+        }
+        
+        return jsonify(final_response)
 
     except Exception as e:
-        app.logger.error(f"ERROR in /api/analyze: {e}", exc_info=True)
-        return jsonify({"error": "حدث خطأ داخلي أثناء تحليل التقارير."}), 500
+        app.logger.error(f"ERROR in /api/analyze-and-recommend: {e}", exc_info=True)
+        return jsonify({"error": "An internal error occurred during analysis"}), 500
 
-# --- تشغيل التطبيق (للتشغيل المحلي فقط) ---
+
 if __name__ == '__main__':
-    get_network_data() # تحميل البيانات في الذاكرة عند بدء التشغيل
-    app.run(debug=True, port=5000)
+    # Load data on startup
+    get_network_data()
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
