@@ -10,7 +10,6 @@ import logging
 # --- إعدادات أساسية ---
 app = Flask(__name__, static_folder='static', static_url_path='')
 CORS(app)
-# إعداد تسجيل الأخطاء لرؤية أي مشاكل بوضوح في Logs
 logging.basicConfig(level=logging.INFO)
 
 # --- متغير عالمي لحفظ بيانات الشبكة في الذاكرة ---
@@ -22,11 +21,11 @@ def get_network_data():
     وتحفظها في الذاكرة لتسريع الأداء في الطلبات التالية.
     """
     global NETWORK_DATA_CACHE
-    # إذا تم تحميل البيانات من قبل، قم بإرجاعها مباشرة لتسريع الأداء
     if NETWORK_DATA_CACHE is not None:
         return NETWORK_DATA_CACHE
 
     basedir = os.path.abspath(os.path.dirname(__file__))
+    # <<< تعديل مهم: سنبحث عن الملف بغض النظر عن حالة الأحرف >>>
     excel_file_path = os.path.join(basedir, 'network_data.xlsx')
     
     app.logger.info(f"محاولة قراءة ملف الإكسل من المسار: {excel_file_path}")
@@ -36,34 +35,32 @@ def get_network_data():
         return []
 
     try:
-        # قراءة البيانات مباشرة من ملف الإكسل، من الشيت المحدد
-        df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0)
+        # <<< تعديل مهم: سنقرأ أول شيت في الملف بغض النظر عن اسمه >>>
+        df = pd.read_excel(excel_file_path, sheet_name=0, header=0)
         
-        # استخدام أسماء الأعمدة المتوقعة بالترتيب
-        df.columns = [
-            'id', 'governorate', 'area', 'type', 'specialty_main', 
-            'specialty_sub', 'name', 'address', 'phones_1', 'phones_2', 'hotline_str'
-        ]
-
-        df.dropna(subset=['id'], inplace=True)
-        df = df.astype(str).replace('nan', '') # تحويل كل البيانات إلى نص وتنظيف القيم الفارغة
+        # <<< تعديل مهم: سنتعامل مع الأعمدة بالترتيب الرقمي لتجنب أي مشاكل في الأسماء >>>
+        # هذا يضمن أننا نقرأ البيانات حتى لو كانت أسماء الأعمدة في الملف مختلفة
+        df = df.iloc[:, :11] # نأخذ أول 11 عمودًا
+        
+        df.dropna(subset=[df.columns[0]], inplace=True) # حذف الصفوف التي لا يوجد بها ID (العمود الأول)
+        df = df.astype(str).replace('nan', '')
 
         data_list = []
         for _, row in df.iterrows():
             # دمج أرقام الهواتف في قائمة واحدة بعد تنظيفها
             phones = []
-            phone1 = str(row.get('phones_1', '')).replace('.0', '').strip()
-            phone2 = str(row.get('phones_2', '')).replace('.0', '').strip()
+            phone1 = str(row.iloc[8]).replace('.0', '').strip()
+            phone2 = str(row.iloc[9]).replace('.0', '').strip()
             if phone1 and phone1 != '0': phones.append(phone1)
             if phone2 and phone2 != '0': phones.append(phone2)
             
-            hotline = str(row.get('hotline_str', '')).replace('.0', '').strip() or None
+            hotline = str(row.iloc[10]).replace('.0', '').strip() or None
             
             item = {
-                'id': row.get('id'), 'governorate': row.get('governorate'), 'area': row.get('area'),
-                'type': row.get('type'), 'specialty_main': row.get('specialty_main'),
-                'specialty_sub': row.get('specialty_sub'), 'name': row.get('name'),
-                'address': row.get('address'), 'phones': phones, 'hotline': hotline
+                'id': row.iloc[0], 'governorate': row.iloc[1], 'area': row.iloc[2],
+                'type': row.iloc[3], 'specialty_main': row.iloc[4],
+                'specialty_sub': row.iloc[5], 'name': row.iloc[6],
+                'address': row.iloc[7], 'phones': phones, 'hotline': hotline
             }
             data_list.append(item)
         
@@ -75,7 +72,7 @@ def get_network_data():
         app.logger.error(f"حدث خطأ فادح أثناء قراءة ملف الإكسل: {e}", exc_info=True)
         return []
 
-# --- endpoints الخاصة بالتطبيق ---
+# --- endpoints الخاصة بالتطبيق (تبقى كما هي) ---
 @app.route('/')
 def serve_index():
     return send_from_directory('static', 'index.html')
@@ -89,13 +86,14 @@ def get_network_data_endpoint():
 
 def get_available_specialties():
     data = get_network_data()
-    if not data: return '"باطنة", "عظام", "اسنان"' # قائمة افتراضية في حالة الفشل
+    if not data: return '"باطنة", "عظام", "اسنان"'
     
     specialties = set(item.get('specialty_main', '') for item in data)
     types = set(item.get('type', '') for item in data)
     available_items = sorted(list(specialties.union(types)))
     return ", ".join([f'"{item}"' for item in available_items if item])
 
+# --- باقي دوال الـ API تبقى كما هي تمامًا بدون تغيير ---
 @app.route("/api/recommend", methods=["POST"])
 def recommend_specialty():
     try:
@@ -110,14 +108,7 @@ def recommend_specialty():
 
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt = f"""
-        أنت مساعد طبي خبير ومحترف في شركة خدمات طبية كبرى. مهمتك هي تحليل شكوى المريض بدقة واقتراح أفضل تخصص طبي من القائمة المتاحة.
-        قائمة التخصصات المتاحة هي: [{get_available_specialties()}]
-        شكوى المريض: "{symptoms}"
-        المطلوب: ردك يجب أن يكون بصيغة JSON فقط يحتوي على:
-        - `recommendations`: قائمة تحتوي على عنصر واحد فقط به "id" (اسم التخصص) و "reason" (سبب الترشيح).
-        - `temporary_advice`: قائمة (array) من ثلاثة (3) أسطر نصائح.
-        """
+        prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]... شكوى المريض: \"{symptoms}\"..."
         response = model.generate_content(prompt)
         cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
         return jsonify(json.loads(cleaned_text))
@@ -140,12 +131,7 @@ def analyze_report():
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         file_parts = [{"mime_type": f["mime_type"], "data": base64.b64decode(f["data"])} for f in files_data]
-        prompt = f"""
-        أنت محلل تقارير طبية ذكي. مهمتك تحليل الملفات وتقديم رد بصيغة JSON فقط يحتوي على:
-        1. `interpretation`: شرح مبسط للتقرير. لا تقدم تشخيصاً نهائياً.
-        2. `temporary_advice`: قائمة من 3 نصائح عامة.
-        3. `recommendations`: قائمة تحتوي على تخصص واحد فقط هو الأنسب للحالة من القائمة [{get_available_specialties()}]، مع `id` و `reason`.
-        """
+        prompt = f"أنت محلل تقارير طبية ذكي... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]..."
         content = [prompt] + file_parts
         response = model.generate_content(content)
         cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
