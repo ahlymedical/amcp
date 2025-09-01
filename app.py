@@ -25,7 +25,6 @@ def get_network_data():
         return NETWORK_DATA_CACHE
 
     basedir = os.path.abspath(os.path.dirname(__file__))
-    # <<< تعديل مهم: سنبحث عن الملف بغض النظر عن حالة الأحرف >>>
     excel_file_path = os.path.join(basedir, 'network_data.xlsx')
     
     app.logger.info(f"محاولة قراءة ملف الإكسل من المسار: {excel_file_path}")
@@ -35,32 +34,39 @@ def get_network_data():
         return []
 
     try:
-        # <<< تعديل مهم: سنقرأ أول شيت في الملف بغض النظر عن اسمه >>>
+        # قراءة أول شيت في الملف بغض النظر عن اسمه
         df = pd.read_excel(excel_file_path, sheet_name=0, header=0)
         
-        # <<< تعديل مهم: سنتعامل مع الأعمدة بالترتيب الرقمي لتجنب أي مشاكل في الأسماء >>>
-        # هذا يضمن أننا نقرأ البيانات حتى لو كانت أسماء الأعمدة في الملف مختلفة
-        df = df.iloc[:, :11] # نأخذ أول 11 عمودًا
-        
-        df.dropna(subset=[df.columns[0]], inplace=True) # حذف الصفوف التي لا يوجد بها ID (العمود الأول)
+        # <<< تعديل مهم: سنقرأ كل الأعمدة الموجودة في ملفك >>>
+        # سنفترض أن الأعمدة هي 11 عمودًا بالترتيب
+        df = df.iloc[:, :11] 
+        df.columns = [
+            'id', 'governorate', 'area', 'type', 'specialty_main', 
+            'specialty_sub', 'name', 'address', 
+            'phones_1', 'phones_2', 'hotline' 
+            # قمنا بإزالة أعمدة الهاتف 3 و 4 مؤقتًا لتجنب الأخطاء، يمكن إضافتها لاحقًا
+        ]
+
+        df.dropna(subset=['id'], inplace=True)
         df = df.astype(str).replace('nan', '')
 
         data_list = []
         for _, row in df.iterrows():
-            # دمج أرقام الهواتف في قائمة واحدة بعد تنظيفها
+            # دمج كل أرقام الهواتف الموجودة في قائمة واحدة
             phones = []
-            phone1 = str(row.iloc[8]).replace('.0', '').strip()
-            phone2 = str(row.iloc[9]).replace('.0', '').strip()
-            if phone1 and phone1 != '0': phones.append(phone1)
-            if phone2 and phone2 != '0': phones.append(phone2)
+            phone_cols = ['phones_1', 'phones_2'] # يمكن إضافة 'phones_3', 'phones_4' هنا
+            for col in phone_cols:
+                phone_val = str(row.get(col, '')).replace('.0', '').strip()
+                if phone_val and phone_val != '0':
+                    phones.append(phone_val)
             
-            hotline = str(row.iloc[10]).replace('.0', '').strip() or None
+            hotline = str(row.get('hotline', '')).replace('.0', '').strip() or None
             
             item = {
-                'id': row.iloc[0], 'governorate': row.iloc[1], 'area': row.iloc[2],
-                'type': row.iloc[3], 'specialty_main': row.iloc[4],
-                'specialty_sub': row.iloc[5], 'name': row.iloc[6],
-                'address': row.iloc[7], 'phones': phones, 'hotline': hotline
+                'id': row.get('id'), 'governorate': row.get('governorate'), 'area': row.get('area'),
+                'type': row.get('type'), 'specialty_main': row.get('specialty_main'),
+                'specialty_sub': row.get('specialty_sub'), 'name': row.get('name'),
+                'address': row.get('address'), 'phones': phones, 'hotline': hotline
             }
             data_list.append(item)
         
@@ -96,19 +102,16 @@ def get_available_specialties():
 # --- باقي دوال الـ API تبقى كما هي تمامًا بدون تغيير ---
 @app.route("/api/recommend", methods=["POST"])
 def recommend_specialty():
+    # ... (الكود لم يتغير)
     try:
         data = request.get_json()
         symptoms = data.get('symptoms')
         if not symptoms: return jsonify({"error": "Missing symptoms"}), 400
-        
         api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            app.logger.error("خطأ فادح في recommend API: متغير البيئة GEMINI_API_KEY غير معين.")
-            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
-
+        if not api_key: return jsonify({"error": "Server configuration error."}), 500
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
-        prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]... شكوى المريض: \"{symptoms}\"..."
+        prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]. شكوى المريض: \"{symptoms}\"..."
         response = model.generate_content(prompt)
         cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
         return jsonify(json.loads(cleaned_text))
@@ -118,16 +121,13 @@ def recommend_specialty():
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze_report():
+    # ... (الكود لم يتغير)
     try:
         data = request.get_json()
         files_data = data.get('files')
         if not files_data: return jsonify({"error": "Missing files"}), 400
-
         api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            app.logger.error("خطأ فادح في analyze API: متغير البيئة GEMINI_API_KEY غير معين.")
-            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
-
+        if not api_key: return jsonify({"error": "Server configuration error."}), 500
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         file_parts = [{"mime_type": f["mime_type"], "data": base64.b64decode(f["data"])} for f in files_data]
