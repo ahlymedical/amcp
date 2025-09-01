@@ -37,16 +37,15 @@
     .feature-box button { background-color: var(--primary-green); color: var(--white); border: none; padding: 12px 25px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.3s; width: 100%; margin-top: 10px; }
     .feature-box button:hover:not(:disabled) { background-color: #005a41; }
     .feature-box button:disabled { background-color: #999; cursor: not-allowed; }
-    .loader { border: 4px solid var(--medium-gray); border-top: 4px solid var(--primary-green); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+    .loader { border: 4px solid var(--medium-gray); border-top: 4px solid var(--primary-green); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 10px auto; display: none; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loader-message { font-size: 14px; color: var(--text-muted); text-align: center; display: none; margin-top: 10px; font-weight: 600; }
     .section-title { font-size: 22px; color: var(--primary-green); padding-bottom: 10px; margin-bottom: 20px; border-bottom: 3px solid var(--primary-orange); }
-    /* --- Professional Provider Card Design --- */
     .provider-card { background-color: var(--white); border: 1px solid var(--medium-gray); border-radius: 12px; margin-bottom: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease; position: relative; overflow: hidden; }
     .provider-card.best-match { border: 2px solid var(--primary-green); box-shadow: 0 8px 25px var(--primary-glow); }
-    /* ===== تعديل مهم: تصميم رأس الترشيح الأنسب مع النجوم ===== */
     .best-match-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--medium-gray); }
     .best-match-badge { background-color: var(--primary-green); color: white; padding: 3px 12px; font-size: 14px; font-weight: bold; border-radius: 20px; display: flex; align-items: center; gap: 8px; }
-    .best-match-stars { color: var(--star-yellow); font-size: 16px; }
+    .best-match-stars { color: var(--star-yellow); font-size: 16px; letter-spacing: 2px; }
     .provider-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
     .provider-icon { width: 50px; height: 50px; background-color: var(--accent-light-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--primary-green); flex-shrink: 0; }
     .provider-name { font-size: 18px; font-weight: 700; color: var(--text-dark); }
@@ -90,17 +89,18 @@
     </div>
     <div class="feature-box" id="search-box">
         <h2> <i class="fa-solid fa-magnifying-glass"></i> البحث المتقدم في الشبكة الطبية <span class="en-subtitle">Advanced Network Search</span></h2>
-        <p>صف الأعراض التي تشعر بها وحدد موقعك، وسيقوم المساعد الذكي بترشيح مقدم الخدمة الأنسب لك.</p>
+        <p>صف الأعراض التي تشعر بها وحدد موقعك، وسيقوم المرشد الطبي الذكي بتحليل حالتك وترشيح مقدم الخدمة الأنسب لك.</p>
         <div class="filter-grid">
-            <textarea id="symptoms-input" rows="3" placeholder="اكتب الأعراض هنا... مثال: أشعر بألم شديد في الظهر مع صعوبة في الحركة"></textarea>
-            <input type="text" id="location-input" placeholder="اكتب المنطقة أو المحافظة هنا... مثال: الطالبية هرم أو الجيزة">
+            <textarea id="symptoms-input" rows="3" placeholder="اكتب الأعراض هنا... مثال: أشعر بإرهاق شديد وصداع مستمر"></textarea>
+            <input type="text" id="location-input" placeholder="اكتب المنطقة أو المحافظة هنا... مثال: فيصل، الجيزة">
         </div>
         <button id="symptoms-search-btn"><i class="fa-solid fa-robot"></i> ابحث الآن بالذكاء الاصطناعي</button>
         <div id="loader-symptoms" class="loader"></div>
+        <div id="loader-message" class="loader-message">المرشد الطبي يحلل طلبك الآن...</div>
     </div>
     <div class="feature-box">
         <h2><i class="fa-solid fa-microscope"></i> تحليل التقارير الطبية <span class="en-subtitle">Analyze Medical Reports</span></h2>
-        <p>ارفع تقاريرك أو التحاليل الطبية (صور أو PDF)، وسيقوم المساعد الذكي بتحليلها وتقديم شرح ونصائح أولية.</p>
+        <p>ارفع تقاريرك أو التحاليل الطبية (صور أو PDF)، وسيقوم الخبير الطبي بتحليلها وتقديم شرح ونصائح أولية.</p>
         <div class="upload-area" id="upload-area">
             <input type="file" id="report-files-input" multiple accept="image/png, image/jpeg, image/webp, application/pdf">
             <label for="report-files-input" class="upload-label">
@@ -133,6 +133,7 @@
         const symptomsInput = document.getElementById('symptoms-input');
         const locationInput = document.getElementById('location-input');
         const loaderSymptoms = document.getElementById('loader-symptoms');
+        const loaderMessage = document.getElementById('loader-message');
         const analyzeBtn = document.getElementById('analyze-reports-btn');
         const analysisResultArea = document.getElementById('analysis-result-area');
         const loaderAnalysis = document.getElementById('loader-analysis');
@@ -141,8 +142,6 @@
         const noResultsDiv = document.getElementById('no-results');
         const specialtyIcons = { 'default': 'fa-solid fa-user-doctor', 'باطنة': 'fa-solid fa-stethoscope', 'علاج طبيعي': 'fa-solid fa-person-walking', 'اسنان': 'fa-solid fa-tooth', 'صيدلية': 'fa-solid fa-pills', 'قلب واوعية دموية': 'fa-solid fa-heart-pulse', 'مخ وأعصاب': 'fa-solid fa-brain', 'معمل': 'fa-solid fa-vial-virus', 'أشعة': 'fa-solid fa-x-ray', 'نساء وتوليد': 'fa-solid fa-person-pregnant', 'اطفال': 'fa-solid fa-child-reaching', 'عظام': 'fa-solid fa-bone', 'جلدية': 'fa-solid fa-hand-dots', 'انف واذن وحنجرة': 'fa-solid fa-head-side-cough', 'عيون': 'fa-solid fa-eye', 'صدرية': 'fa-solid fa-lungs', 'جراحة عامة': 'fa-solid fa-user-doctor', 'مسالك بولية': 'fa-solid fa-toilet-paper', 'مستشفى': 'fa-solid fa-hospital', 'مركز طبي': 'fa-solid fa-house-medical', 'بصريات': 'fa-solid fa-glasses' };
         function getIconForSpecialty(specialty) { if (!specialty) return specialtyIcons['default']; const specialtyLower = specialty.toLowerCase(); for (const key in specialtyIcons) { if (specialtyLower.includes(key.toLowerCase())) return specialtyIcons[key]; } return specialtyIcons['default']; }
-        
-        // ===== تعديل جذري: دالة عرض النتائج الجديدة =====
         function renderResults(bestMatch, otherResults) {
             networkContainer.innerHTML = '';
             const allResults = (bestMatch || []).concat(otherResults || []);
@@ -157,64 +156,29 @@
                     let phonesHTML = provider.phones && provider.phones.length > 0 ? `<div class="phones-list">${provider.phones.map(p => `<span>${p}</span>`).join('')}</div>` : 'غير متوفر';
                     let hotlineHTML = provider.hotline ? `<div class="phones-list"><span>${provider.hotline}</span></div>` : 'غير متوفر';
                     const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.name + ', ' + provider.address)}`;
-                    
-                    // بناء رأس البطاقة بشكل ديناميكي
-                    let cardHeaderHTML = '';
-                    if (isBestMatch) {
-                        cardHeaderHTML = `
-                        <div class="best-match-header">
-                            <div class="best-match-badge"><i class="fa-solid fa-award"></i> الترشيح الأنسب</div>
-                            <div class="best-match-stars">
-                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                            </div>
-                        </div>`;
-                    }
-
-                    card.innerHTML = `
-                        ${cardHeaderHTML}
-                        <div class="provider-header">
-                            <div class="provider-icon"><i class="${iconClass}"></i></div>
-                            <div>
-                                <div class="provider-name">${provider.name||'غير متوفر'}</div>
-                                <div class="provider-specialty">${provider.provider_type||''} / ${provider.specialty_sub||''}</div>
-                            </div>
-                        </div>
-                        <div class="provider-info-grid">
-                            <div class="provider-info-item"><i class="fa-solid fa-location-dot"></i><div>${provider.address||'غير متوفر'}</div></div>
-                            <div class="provider-info-item"><i class="fa-solid fa-phone-volume"></i><div>${phonesHTML}</div></div>
-                            <div class="provider-info-item"><i class="fa-solid fa-headset"></i><div>${hotlineHTML}</div></div>
-                        </div>
-                        <div class="provider-nav">
-                            <a href="${googleMapsUrl}" target="_blank" class="nav-btn map-btn" title="عرض على الخريطة (GPS)"><i class="fa-solid fa-map-location-dot"></i></a>
-                            <button class="nav-btn nav-btn-up" title="العودة للبحث"><i class="fa-solid fa-arrow-up"></i></button>
-                            <button class="nav-btn nav-btn-down" title="الذهاب لخريطة المقر الرئيسي"><i class="fa-solid fa-arrow-down"></i></button>
-                        </div>`;
+                    let cardHeaderHTML = isBestMatch ? `<div class="best-match-header"><div class="best-match-badge"><i class="fa-solid fa-award"></i> الترشيح الأنسب</div><div class="best-match-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div></div>` : '';
+                    card.innerHTML = `${cardHeaderHTML}<div class="provider-header"><div class="provider-icon"><i class="${iconClass}"></i></div><div><div class="provider-name">${provider.name||'غير متوفر'}</div><div class="provider-specialty">${provider.provider_type||''} / ${provider.specialty_sub||''}</div></div></div><div class="provider-info-grid"><div class="provider-info-item"><i class="fa-solid fa-location-dot"></i><div>${provider.address||'غير متوفر'}</div></div><div class="provider-info-item"><i class="fa-solid fa-phone-volume"></i><div>${phonesHTML}</div></div><div class="provider-info-item"><i class="fa-solid fa-headset"></i><div>${hotlineHTML}</div></div></div><div class="provider-nav"><a href="${googleMapsUrl}" target="_blank" class="nav-btn map-btn" title="عرض على الخريطة (GPS)"><i class="fa-solid fa-map-location-dot"></i></a><button class="nav-btn nav-btn-up" title="العودة للبحث"><i class="fa-solid fa-arrow-up"></i></button><button class="nav-btn nav-btn-down" title="الذهاب لخريطة المقر الرئيسي"><i class="fa-solid fa-arrow-down"></i></button></div>`;
                     cardFragment.appendChild(card);
                 }); networkContainer.appendChild(cardFragment);
             }
         }
-
         async function handleSymptomsSearch() {
             const symptomsText = symptomsInput.value.trim(); const locationText = locationInput.value.trim();
             if (!symptomsText || !locationText) { alert('من فضلك، قم بوصف الأعراض وتحديد موقعك.'); return; }
-            loaderSymptoms.style.display = 'block'; symptomsSearchBtn.disabled = true;
-            // مسح كل النتائج السابقة قبل البحث الجديد
+            loaderSymptoms.style.display = 'block'; loaderMessage.style.display = 'block'; symptomsSearchBtn.disabled = true;
             aiAdviceContainer.innerHTML = ''; analysisResultArea.innerHTML = ''; networkContainer.innerHTML = ''; noResultsDiv.style.display = 'none';
             try {
                 const response = await fetch('/api/symptoms-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ symptoms: symptomsText, location: locationText }) });
-                if (!response.ok) { const err = await response.json(); throw new Error(err.error || 'فشل الاتصال بالخادم.'); }
                 const result = await response.json();
-                // عرض الشرح الطبي الاحترافي أولاً
-                if (result.initial_advice) { aiAdviceContainer.innerHTML = `<div class="analysis-card" style="margin-bottom: 20px;"><h3 class="analysis-section-title"><i class="fa-solid fa-user-doctor"></i> شرح ونصائح طبية أولية</h3><p style="white-space: pre-wrap;">${result.initial_advice}</p></div>`; }
-                // ثم عرض النتائج
+                if (!response.ok) { throw new Error(result.error || 'فشل الاتصال بالخادم.'); }
+                if (result.initial_advice) { aiAdviceContainer.innerHTML = `<div class="analysis-card" style="margin-bottom: 20px;"><h3 class="analysis-section-title"><i class="fa-solid fa-user-doctor"></i> شرح ونصائح طبية أولية</h3><p style="white-space: pre-wrap; line-height: 2;">${result.initial_advice}</p></div>`; }
                 renderResults(result.best_match, result.other_results);
                 aiAdviceContainer.scrollIntoView({ behavior: 'smooth' });
-            } catch (error) { aiAdviceContainer.innerHTML = `<p style="color:var(--danger-red); text-align:center;">عفواً، حدث خطأ تقني: ${error.message}</p>`; } finally { loaderSymptoms.style.display = 'none'; symptomsSearchBtn.disabled = false; }
+            } catch (error) { aiAdviceContainer.innerHTML = `<div class="analysis-card" style="border-color: var(--danger-red);"><p style="color:var(--danger-red); text-align:center; font-weight: 600;">عفواً، حدث خطأ: ${error.message}</p></div>`; } finally { loaderSymptoms.style.display = 'none'; loaderMessage.style.display = 'none'; symptomsSearchBtn.disabled = false; }
         }
         async function handleAIAnalysis() {
             if (uploadedFiles.length === 0) { alert('يرجى اختيار ملف واحد على الأقل لتحليله.'); return; }
             loaderAnalysis.style.display = 'block'; analyzeBtn.disabled = true;
-            // مسح كل النتائج السابقة
             aiAdviceContainer.innerHTML = ''; analysisResultArea.innerHTML = ''; networkContainer.innerHTML = ''; noResultsDiv.style.display = 'none';
             try {
                 const filesPayload = await Promise.all(uploadedFiles.map(file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve({ mime_type: file.type, data: reader.result.split(',')[1] }); reader.onerror = error => reject(error); })));
