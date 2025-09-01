@@ -25,38 +25,34 @@ def get_network_data():
         return NETWORK_DATA_CACHE
 
     basedir = os.path.abspath(os.path.dirname(__file__))
-    excel_file_path = os.path.join(basedir, 'network_data.xlsx')
+    # <<< هذا هو السطر الذي تم تصحيحه بشكل نهائي >>>
+    excel_file_path = os.path.join(basedir, 'network_data_files', 'network_data.xlsx')
     
-    app.logger.info(f"محاولة قراءة ملف الإكسل من المسار: {excel_file_path}")
+    app.logger.info(f"محاولة قراءة ملف الإكسل من المسار الصحيح: {excel_file_path}")
 
     if not os.path.exists(excel_file_path):
         app.logger.error(f"خطأ فادح: ملف الإكسل '{excel_file_path}' غير موجود.")
         return []
 
     try:
-        # قراءة أول شيت في الملف بغض النظر عن اسمه
-        df = pd.read_excel(excel_file_path, sheet_name=0, header=0)
+        df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0)
         
-        # نحدد عدد الأعمدة التي سنقرأها لتشمل كل الهواتف والهوتلاين
-        # ID, Gov, Area, Type, Main, Sub, Name, Address, Tel1, Tel2, Tel3, Tel4, Hotline -> 13 columns
-        # سنقرأ 13 عمودًا لضمان تغطية كل البيانات المحتملة
-        num_columns_to_read = min(13, len(df.columns))
-        df = df.iloc[:, :num_columns_to_read]
+        # قراءة الأعمدة بناءً على الترتيب لضمان المرونة
+        num_columns = len(df.columns)
         
         df.dropna(subset=[df.columns[0]], inplace=True)
         df = df.astype(str).replace('nan', '')
 
         data_list = []
         for _, row in df.iterrows():
-            # دمج كل أرقام الهواتف الموجودة في قائمة واحدة
             phones = []
-            # نفترض أن الهواتف تبدأ من العمود التاسع (index 8)
-            for i in range(8, min(12, len(row))): # Tel1, Tel2, Tel3, Tel4
+            # دمج كل أعمدة الهواتف المتاحة (من العمود الثامن حتى ما قبل الأخير)
+            for i in range(8, num_columns - 1):
                 phone_val = str(row.iloc[i]).replace('.0', '').strip()
                 if phone_val and phone_val != '0':
                     phones.append(phone_val)
             
-            hotline = str(row.iloc[min(12, len(row)-1)]).replace('.0', '').strip() or None
+            hotline = str(row.iloc[num_columns - 1]).replace('.0', '').strip() or None
             if hotline == '0': hotline = None
             
             item = {
@@ -97,15 +93,19 @@ def get_available_specialties():
     return ", ".join([f'"{item}"' for item in available_items if item])
 
 # --- باقي دوال الـ API تبقى كما هي تمامًا بدون تغيير ---
+# (سأضعها كاملة لسهولة النسخ)
 @app.route("/api/recommend", methods=["POST"])
 def recommend_specialty():
-    # ... (الكود لم يتغير)
     try:
         data = request.get_json()
         symptoms = data.get('symptoms')
         if not symptoms: return jsonify({"error": "Missing symptoms"}), 400
+        
         api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key: return jsonify({"error": "Server configuration error."}), 500
+        if not api_key:
+            app.logger.error("خطأ فادح في recommend API: متغير البيئة GEMINI_API_KEY غير معين.")
+            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
+
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]. شكوى المريض: \"{symptoms}\"..."
@@ -118,13 +118,16 @@ def recommend_specialty():
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze_report():
-    # ... (الكود لم يتغير)
     try:
         data = request.get_json()
         files_data = data.get('files')
         if not files_data: return jsonify({"error": "Missing files"}), 400
+
         api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key: return jsonify({"error": "Server configuration error."}), 500
+        if not api_key:
+            app.logger.error("خطأ فادح في analyze API: متغير البيئة GEMINI_API_KEY غير معين.")
+            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
+
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         file_parts = [{"mime_type": f["mime_type"], "data": base64.b64decode(f["data"])} for f in files_data]
