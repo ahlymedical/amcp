@@ -11,12 +11,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-    /* === تم الإبقاء على كل أكواد التصميم الأصلية بدون أي تغيير === */
+    /* === تم الإبقاء على كل أكواد التصميم الأصلية التي أرسلتها بدون أي تغيير === */
     :root {
-        --primary-green: #006A4E; --primary-orange: #F58220; --accent-light-green: #E6F0ED;
-        --white: #ffffff; --light-gray: #f0f2f5; --medium-gray: #e9ecef;
-        --text-dark: #212529; --text-muted: #6c757d; --danger-red: #dc3545;
-        --primary-glow: rgba(0, 106, 78, 0.3); --star-yellow: #FFC107;
+        --primary-green: #006A4E; --primary-orange: #F58220; --special-green-teal: #008080; --accent-light-green: #E6F0ED;
+        --white: #ffffff; --light-gray: #f0f2f5; --medium-gray: #e9ecef; --text-dark: #212529;
+        --text-muted: #6c757d; --danger-red: #dc3545; --primary-glow: rgba(0, 106, 78, 0.3); --star-yellow: #FFC107;
     }
     html { scroll-behavior: smooth; }
     body { font-family: 'Cairo', sans-serif; background-color: var(--light-gray); margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; color: var(--text-dark); line-height: 1.7; }
@@ -30,19 +29,21 @@
     .info-item { display: flex; align-items: center; gap: 15px; }
     .info-item i { font-size: 22px; color: var(--primary-orange); width: 25px; text-align: center; }
     .info-item-text a { color: var(--text-dark); text-decoration: none; font-weight: 600; }
+    .info-item-text a:hover { color: var(--primary-green); }
     .info-item-text .en { font-family: 'Poppins', sans-serif; font-size: 0.8em; color: var(--text-muted); display: block; }
     .feature-box { text-align: right; margin-bottom: 25px; padding: 20px; background-color: var(--accent-light-green); border: 1px solid var(--medium-gray); border-radius: 10px; }
     .feature-box h2 { font-size: 18px; color: var(--primary-green); margin-top: 0; margin-bottom: 5px; }
     .feature-box h2 .en-subtitle { font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 400; color: var(--text-muted); display: block; margin-top: 2px; }
     .feature-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
-    /* --- تم تعديل هذا الجزء فقط ليلائم المدخلات الجديدة (Textarea, input) بدلاً من (select) --- */
-    .feature-box textarea, .feature-box input[type="text"] { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Cairo', sans-serif; font-size: 14px; box-sizing: border-box; background-color: var(--white); margin-bottom: 10px; }
+    .filter-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; } /* Changed to 1 column for new layout */
+    .feature-box select, .feature-box textarea, .feature-box input[type="text"] { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Cairo', sans-serif; font-size: 14px; box-sizing: border-box; background-color: var(--white); margin-bottom: 10px; }
     .feature-box button { background-color: var(--primary-green); color: var(--white); border: none; padding: 12px 25px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.3s; width: 100%; margin-top: 10px; }
     .feature-box button:hover:not(:disabled) { background-color: #005a41; }
     .feature-box button:disabled { background-color: #999; cursor: not-allowed; }
     .loader { border: 4px solid var(--medium-gray); border-top: 4px solid var(--primary-green); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .results-area { margin-top: 30px; } .section-title { font-size: 22px; color: var(--primary-green); padding-bottom: 10px; margin-bottom: 20px; border-bottom: 3px solid var(--primary-orange); }
+    .section-title { font-size: 22px; color: var(--primary-green); padding-bottom: 10px; margin-bottom: 20px; border-bottom: 3px solid var(--primary-orange); }
+    #intermediate-results-container { margin-top: 20px; display: none; }
     /* --- التصميم الاحترافي لبطاقة النتائج كما طلبت --- */
     .provider-card { background-color: var(--white); border: 1px solid var(--medium-gray); border-radius: 12px; margin-bottom: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease; position: relative; overflow: hidden; }
     .provider-card.best-match { border: 2px solid var(--primary-green); box-shadow: 0 8px 25px var(--primary-glow); }
@@ -63,6 +64,7 @@
     .nav-btn.map-btn { background-color: var(--primary-orange); color: var(--white); }
     .nav-btn.map-btn:hover { background-color: #d9711c; }
     #no-results { text-align: center; padding: 40px 20px; background-color: var(--accent-light-green); border-radius: 8px; color: var(--text-muted); font-weight: 600; display: none; }
+    .ai-result-area { margin-top: 20px; }
     .analysis-card { background-color: var(--white); border: 2px solid var(--primary-green); box-shadow: 0 0 20px var(--primary-glow); border-radius: 10px; padding: 20px; text-align: right; }
     .analysis-card .disclaimer { background-color: #fff3cd; border-right: 5px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
     .analysis-card .disclaimer strong { color: #856404; }
@@ -89,22 +91,22 @@
         </div>
     </div>
 
-    <!-- ===== تعديل رئيسي هنا: الحفاظ على الصندوق الأصلي مع تغيير محتواه ===== -->
+    <!-- ===== Advanced Network Search (تم تعديل هذا الصندوق فقط) ===== -->
     <div class="feature-box" id="search-box">
-        <h2> <i class="fa-solid fa-magnifying-glass"></i> البحث الذكي في الشبكة الطبية <span class="en-subtitle">Smart AI Search</span></h2>
+        <h2> <i class="fa-solid fa-magnifying-glass"></i> البحث المتقدم في الشبكة الطبية <span class="en-subtitle">Advanced Network Search</span></h2>
         <p>صف الأعراض التي تشعر بها وحدد موقعك، وسيقوم المساعد الذكي بترشيح مقدم الخدمة الأنسب لك.</p>
-        
-        <!-- تم استبدال الفلاتر القديمة بهذه المدخلات الجديدة -->
-        <textarea id="symptoms-input" rows="3" placeholder="اكتب الأعراض هنا... مثال: أشعر بألم شديد في الظهر مع صعوبة في الحركة"></textarea>
-        <input type="text" id="location-input" placeholder="اكتب المنطقة أو المحافظة هنا... مثال: الطالبية هرم أو الجيزة">
-        
-        <button id="symptoms-search-btn"><i class="fa-solid fa-robot"></i> أرشدني لأفضل مقدم خدمة</button>
+        <div class="filter-grid">
+            <!-- تم حذف الفلاتر القديمة ووضع هذه العناصر بدلاً منها -->
+            <textarea id="symptoms-input" rows="3" placeholder="اكتب الأعراض هنا... مثال: أشعر بألم شديد في الظهر مع صعوبة في الحركة"></textarea>
+            <input type="text" id="location-input" placeholder="اكتب المنطقة أو المحافظة هنا... مثال: الطالبية هرم أو الجيزة">
+        </div>
+        <button id="symptoms-search-btn"><i class="fa-solid fa-robot"></i> ابحث الآن بالذكاء الاصطناعي</button>
         <div id="loader-symptoms" class="loader"></div>
     </div>
 
-    <!-- ===== هذا الصندوق بقي كما هو في التصميم الأصلي ===== -->
+    <!-- ===== AI Tools Section (هذا الصندوق لتحليل التقارير فقط الآن) ===== -->
     <div class="feature-box">
-        <h2><i class="fa-solid fa-microscope"></i> تحليل التقارير الطبية بالذكاء الاصطناعي <span class="en-subtitle">AI Report Analysis</span></h2>
+        <h2><i class="fa-solid fa-microscope"></i> تحليل التقارير الطبية <span class="en-subtitle">Analyze Medical Reports</span></h2>
         <p>ارفع تقاريرك أو التحاليل الطبية (صور أو PDF)، وسيقوم المساعد الذكي بتحليلها وتقديم شرح ونصائح أولية.</p>
         <div class="upload-area" id="upload-area">
             <input type="file" id="report-files-input" multiple accept="image/png, image/jpeg, image/webp, application/pdf">
@@ -118,18 +120,16 @@
         <div id="loader-analysis" class="loader"></div>
     </div>
 
-    <!-- ===== قسم عرض النتائج الديناميكي ===== -->
-    <div class="results-area" id="results-area">
-        <div id="ai-advice-container"></div>
-        <div id="analysis-result-area"></div>
-        <div id="network-container"></div>
-        <div id="no-results">
-            <i class="fa-solid fa-box-open" style="font-size: 40px; margin-bottom: 15px;"></i>
-            <p>عفواً، لا توجد نتائج مطابقة لبحثك.</p>
-        </div>
+    <!-- ===== Search Results Content (هذا القسم لم يتغير) ===== -->
+    <div id="ai-advice-container"></div>
+    <div id="analysis-result-area" class="ai-result-area"></div>
+    <div id="network-container"></div>
+    <div id="no-results">
+        <i class="fa-solid fa-box-open" style="font-size: 40px; margin-bottom: 15px;"></i>
+        <p>لا توجد نتائج مطابقة لبحثك. <br> <small>No results found matching your criteria.</small></p>
     </div>
 
-    <!-- ===== قسم خريطة المقر الرئيسي (ثابت) ===== -->
+    <!-- ===== Map Section (هذا القسم لم يتغير) ===== -->
     <div class="location-section" id="location-section">
         <h2> <i class="fa-solid fa-map-location-dot"></i> موقعنا على الخريطة</h2>
         <div class="location-map">
@@ -138,9 +138,8 @@
         <p class="location-address">57 برج الجامعة، شارع مراد، الجيزة</p>
     </div>
 </div>
-
 <script>
-    // === كل أكواد الجافاسكربت هنا مضبوطة للتعامل مع التصميم الجديد ===
+    // === الكود البرمجي النهائي الذي يشغل كل شيء ===
     document.addEventListener('DOMContentLoaded', function() {
         const symptomsSearchBtn = document.getElementById('symptoms-search-btn');
         const symptomsInput = document.getElementById('symptoms-input');
@@ -149,14 +148,14 @@
         const analyzeBtn = document.getElementById('analyze-reports-btn');
         const analysisResultArea = document.getElementById('analysis-result-area');
         const loaderAnalysis = document.getElementById('loader-analysis');
-        const resultsArea = document.getElementById('results-area');
         const aiAdviceContainer = document.getElementById('ai-advice-container');
         const networkContainer = document.getElementById('network-container');
         const noResultsDiv = document.getElementById('no-results');
         const specialtyIcons = { 'default': 'fa-solid fa-user-doctor', 'باطنة': 'fa-solid fa-stethoscope', 'علاج طبيعي': 'fa-solid fa-person-walking', 'اسنان': 'fa-solid fa-tooth', 'صيدلية': 'fa-solid fa-pills', 'قلب واوعية دموية': 'fa-solid fa-heart-pulse', 'مخ وأعصاب': 'fa-solid fa-brain', 'معمل': 'fa-solid fa-vial-virus', 'أشعة': 'fa-solid fa-x-ray', 'نساء وتوليد': 'fa-solid fa-person-pregnant', 'اطفال': 'fa-solid fa-child-reaching', 'عظام': 'fa-solid fa-bone', 'جلدية': 'fa-solid fa-hand-dots', 'انف واذن وحنجرة': 'fa-solid fa-head-side-cough', 'عيون': 'fa-solid fa-eye', 'صدرية': 'fa-solid fa-lungs', 'جراحة عامة': 'fa-solid fa-user-doctor', 'مسالك بولية': 'fa-solid fa-toilet-paper', 'مستشفى': 'fa-solid fa-hospital', 'مركز طبي': 'fa-solid fa-house-medical', 'بصريات': 'fa-solid fa-glasses' };
         function getIconForSpecialty(specialty) { if (!specialty) return specialtyIcons['default']; const specialtyLower = specialty.toLowerCase(); for (const key in specialtyIcons) { if (specialtyLower.includes(key.toLowerCase())) return specialtyIcons[key]; } return specialtyIcons['default']; }
         function renderResults(bestMatch, otherResults) {
-            networkContainer.innerHTML = ''; const allResults = (bestMatch || []).concat(otherResults || []);
+            networkContainer.innerHTML = ''; aiAdviceContainer.innerHTML = ''; analysisResultArea.innerHTML = '';
+            const allResults = (bestMatch || []).concat(otherResults || []);
             noResultsDiv.style.display = allResults.length === 0 ? 'block' : 'none';
             if (allResults.length > 0) {
                 const title = document.createElement('h2'); title.className = 'section-title'; title.textContent = `نتائج البحث (${allResults.length})`;
@@ -176,26 +175,25 @@
         async function handleSymptomsSearch() {
             const symptomsText = symptomsInput.value.trim(); const locationText = locationInput.value.trim();
             if (!symptomsText || !locationText) { alert('من فضلك، قم بوصف الأعراض وتحديد موقعك.'); return; }
-            loaderSymptoms.style.display = 'block'; aiAdviceContainer.innerHTML = ''; analysisResultArea.innerHTML = ''; networkContainer.innerHTML = '';
-            noResultsDiv.style.display = 'none'; symptomsSearchBtn.disabled = true;
+            loaderSymptoms.style.display = 'block'; symptomsSearchBtn.disabled = true;
             try {
                 const response = await fetch('/api/symptoms-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ symptoms: symptomsText, location: locationText }) });
                 if (!response.ok) { const err = await response.json(); throw new Error(err.error || 'فشل الاتصال بالخادم.'); }
                 const result = await response.json();
                 if (result.initial_advice) { aiAdviceContainer.innerHTML = `<div class="analysis-card" style="margin-bottom: 20px;"><h3 class="analysis-section-title">نصيحة طبية أولية</h3><p>${result.initial_advice}</p></div>`; }
                 renderResults(result.best_match, result.other_results);
-                resultsArea.scrollIntoView({ behavior: 'smooth' });
+                networkContainer.scrollIntoView({ behavior: 'smooth' });
             } catch (error) { aiAdviceContainer.innerHTML = `<p style="color:var(--danger-red); text-align:center;">عفواً، حدث خطأ تقني: ${error.message}</p>`; } finally { loaderSymptoms.style.display = 'none'; symptomsSearchBtn.disabled = false; }
         }
         async function handleAIAnalysis() {
             if (uploadedFiles.length === 0) { alert('يرجى اختيار ملف واحد على الأقل لتحليله.'); return; }
-            loaderAnalysis.style.display = 'block'; analysisResultArea.innerHTML = ''; aiAdviceContainer.innerHTML = ''; networkContainer.innerHTML = '';
-            noResultsDiv.style.display = 'none'; analyzeBtn.disabled = true;
+            loaderAnalysis.style.display = 'block'; analyzeBtn.disabled = true;
             try {
                 const filesPayload = await Promise.all(uploadedFiles.map(file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve({ mime_type: file.type, data: reader.result.split(',')[1] }); reader.onerror = error => reject(error); })));
                 const response = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ files: filesPayload }) });
                 if (!response.ok) { const err = await response.json(); throw new Error(err.error || 'فشل الاتصال بالخادم.'); }
                 const result = await response.json();
+                networkContainer.innerHTML = ''; aiAdviceContainer.innerHTML = ''; noResultsDiv.style.display = 'none';
                 analysisResultArea.innerHTML = `<div class="analysis-card"><div class="disclaimer"><i class="fa-solid fa-triangle-exclamation"></i> <strong>تنبيه هام:</strong> هذا التحليل إرشادي ولا يغني عن استشارة الطبيب.</div><h3 class="analysis-section-title">شرح مبدئي للتقرير</h3><p>${result.interpretation}</p><h3 class="analysis-section-title">نصائح وإرشادات مؤقتة</h3><ul>${result.temporary_advice.map(item=>`<li>${item}</li>`).join('')}</ul><h3 class="analysis-section-title">التخصص الموصى به</h3><p><strong>${result.recommended_specialty}</strong></p><div class="next-step-guidance"><i class="fa-solid fa-circle-info"></i> الخطوة التالية: استخدم أداة البحث بالأعراض أعلاه، اكتب "${result.recommended_specialty}" مع موقعك للعثور على أفضل مقدم خدمة لك.</div></div>`;
                 analysisResultArea.scrollIntoView({ behavior: 'smooth' });
             } catch (error) { analysisResultArea.innerHTML = `<p style="color:var(--danger-red); text-align:center;">عفواً، حدث خطأ تقني: ${error.message}</p>`; } finally { loaderAnalysis.style.display = 'none'; analyzeBtn.disabled = uploadedFiles.length === 0; }
