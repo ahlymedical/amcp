@@ -10,55 +10,55 @@ import logging
 # --- إعدادات أساسية ---
 app = Flask(__name__, static_folder='static', static_url_path='')
 CORS(app)
-# إعداد تسجيل الأخطاء لرؤية أي مشاكل بوضوح في Logs
 logging.basicConfig(level=logging.INFO)
 
-# --- متغير عالمي لحفظ بيانات الشبكة بعد قراءتها لأول مرة ---
+# --- متغير عالمي لحفظ بيانات الشبكة في الذاكرة ---
 NETWORK_DATA_CACHE = None
 
 def get_network_data():
     """
-    تقوم هذه الدالة بقراءة بيانات الشبكة مباشرة من ملف الإكسل (HTML) عند أول طلب فقط،
-    ثم تحفظها في الذاكرة للطلبات التالية.
+    تقوم هذه الدالة بقراءة بيانات الشبكة مباشرة من ملف الإكسل (xlsx)
+    وتحفظها في الذاكرة لتسريع الأداء في الطلبات التالية.
     """
     global NETWORK_DATA_CACHE
-    # إذا تم تحميل البيانات من قبل، قم بإرجاعها مباشرة لتسريع الأداء
     if NETWORK_DATA_CACHE is not None:
         return NETWORK_DATA_CACHE
 
     basedir = os.path.abspath(os.path.dirname(__file__))
-    html_file_path = os.path.join(basedir, 'network_data_files', 'sheet001.htm')
+    excel_file_path = os.path.join(basedir, 'network_data.xlsx')
     
-    app.logger.info(f"محاولة قراءة ملف البيانات من المسار: {html_file_path}")
+    app.logger.info(f"محاولة قراءة ملف الإكسل من المسار: {excel_file_path}")
 
-    if not os.path.exists(html_file_path):
-        app.logger.error(f"خطأ فادح: ملف مصدر البيانات '{html_file_path}' غير موجود.")
+    if not os.path.exists(excel_file_path):
+        app.logger.error(f"خطأ فادح: ملف الإكسل '{excel_file_path}' غير موجود.")
         return []
 
     try:
-        # قراءة محتوى الملف مع تحديد الترميز الصحيح
-        df_list = pd.read_html(html_file_path, encoding='windows-1256', header=0)
-        df = df_list[0]
+        # قراءة البيانات مباشرة من ملف الإكسل
+        df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0)
         
-        # التأكد من وجود 10 أعمدة على الأقل قبل المتابعة
-        if df.shape[1] < 10:
-            raise ValueError(f"تم العثور على {df.shape[1]} أعمدة فقط، بينما المتوقع 10 على الأقل.")
-
-        df = df.iloc[:, :10]
-        df.columns = [
+        # التأكد من أسماء الأعمدة الصحيحة
+        # ملاحظة: pandas قد يقرأ Telephone1 و Telephone2 كأسماء. سنتعامل معها.
+        # سنفترض أن الأعمدة هي بالترتيب كما في الصورة.
+        expected_columns = [
             'id', 'governorate', 'area', 'type', 'specialty_main', 
-            'specialty_sub', 'name', 'address', 'phones_str', 'hotline_str'
+            'specialty_sub', 'name', 'address', 'phones_1', 'phones_2', 'hotline_str'
         ]
-        
+        # نأخذ أول 11 عمودًا فقط ونعيد تسميتها
+        df = df.iloc[:, :11]
+        df.columns = expected_columns
+
         df.dropna(subset=['id'], inplace=True)
-        df = df.astype(str) # تحويل كل البيانات إلى نص لتجنب أخطاء JSON
-        
+        df = df.astype(str).replace('nan', '') # تحويل كل البيانات إلى نص وتنظيف القيم الفارغة
+
         data_list = []
         for _, row in df.iterrows():
-            phones = [p.strip() for p in row.get('phones_str', '').split('/') if p.strip()]
+            # دمج أرقام الهواتف في قائمة واحدة
+            phones = []
+            if row.get('phones_1'): phones.append(row['phones_1'].strip())
+            if row.get('phones_2'): phones.append(row['phones_2'].strip())
             
-            hotline_val = str(row.get('hotline_str', '')).replace('.0', '').strip()
-            hotline = hotline_val if hotline_val.isdigit() else None
+            hotline = row.get('hotline_str', '').replace('.0', '').strip() or None
             
             item = {
                 'id': row.get('id'), 'governorate': row.get('governorate'), 'area': row.get('area'),
@@ -69,30 +69,26 @@ def get_network_data():
             data_list.append(item)
         
         NETWORK_DATA_CACHE = data_list
-        app.logger.info(f"نجحت العملية! تم تحميل {len(NETWORK_DATA_CACHE)} سجل في الذاكرة.")
+        app.logger.info(f"نجحت العملية! تم تحميل {len(NETWORK_DATA_CACHE)} سجل من ملف الإكسل.")
         return NETWORK_DATA_CACHE
 
     except Exception as e:
-        app.logger.error(f"حدث خطأ فادح أثناء قراءة وتحليل ملف HTML: {e}", exc_info=True)
+        app.logger.error(f"حدث خطأ فادح أثناء قراءة ملف الإكسل: {e}", exc_info=True)
         return []
 
-# --- endpoints الخاصة بالتطبيق ---
+# --- endpoints الخاصة بالتطبيق (تبقى كما هي) ---
 @app.route('/')
 def serve_index():
     return send_from_directory('static', 'index.html')
 
 @app.route('/api/network')
 def get_network_data_endpoint():
-    """Endpoint لإرسال بيانات الشبكة للواجهة الأمامية."""
     data = get_network_data()
     return jsonify(data)
 
 def get_available_specialties():
-    """الحصول على قائمة التخصصات من البيانات المحملة."""
     data = get_network_data()
-    if not data:
-        return '"باطنة", "عظام", "اسنان", "صيدلية"' # قائمة افتراضية في حالة الفشل
-    
+    if not data: return '"باطنة", "عظام", "اسنان"'
     specialties = set(item.get('specialty_main', '') for item in data)
     types = set(item.get('type', '') for item in data)
     available_items = sorted(list(specialties.union(types)))
@@ -108,7 +104,6 @@ def recommend_specialty():
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
     prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]... شكوى المريض: \"{symptoms}\"..."
-    # ... بقية الكود ...
     response = model.generate_content(prompt)
     cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
     return jsonify(json.loads(cleaned_text))
@@ -120,7 +115,6 @@ def analyze_report():
     files_data = data.get('files')
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key: return jsonify({"error": "Server configuration error."}), 500
-    # ... بقية الكود ...
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
     file_parts = [{"mime_type": f["mime_type"], "data": base64.b64decode(f["data"])} for f in files_data]
