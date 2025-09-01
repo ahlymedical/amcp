@@ -149,5 +149,5 @@ def analyze_report():
         return jsonify({"error": "حدث خطأ داخلي أثناء تحليل التقارير."}), 500
 
 if __name__ == '__main__':
-    get_network_data()
+    get_network_data() # تحميل البيانات في الذاكرة عند بدء التشغيل لضمان السرعة
     app.run(debug=True, port=5000)
