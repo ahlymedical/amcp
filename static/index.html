@@ -318,6 +318,12 @@
     .location-map iframe { width: 100%; height: 100%; border: 0; }
     .location-address { margin-top: 15px; font-size: 16px; color: var(--text-muted); line-height: 1.7; }
 
+    /* --- بداية التعديل المطلوب --- */
+    #specialty-sub-filter {
+        grid-column: 1 / -1; /* تجعل العنصر يمتد على عرض الشبكة بالكامل */
+    }
+    /* --- نهاية التعديل المطلوب --- */
+
 </style>
 </head>
 <body>
@@ -448,6 +454,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 
     function getIconForSpecialty(specialty) {
+        if (!specialty) return specialtyIcons['default'];
         for (const key in specialtyIcons) {
             if (specialty.toLowerCase().includes(key.toLowerCase())) {
                 return specialtyIcons[key];
@@ -472,19 +479,25 @@ document.addEventListener('DOMContentLoaded', async function() {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             networkData = await response.json();
+            if (!Array.isArray(networkData) || networkData.length === 0) {
+                console.error("البيانات المستلمة ليست مصفوفة أو أنها فارغة.");
+                alert("لم يتم تحميل بيانات الشبكة بنجاح. قد تكون هناك مشكلة في المصدر.");
+                return;
+            }
             console.log(`تم تحميل ${networkData.length} سجل من الشبكة الطبية.`);
             initFilters();
         } catch (error) {
             console.error("فشل تحميل بيانات الشبكة:", error);
-            alert("حدث خطأ أثناء تحميل بيانات الشبكة الطبية. يرجى إعادة تحميل الصفحة.");
+            alert("حدث خطأ أثناء تحميل بيانات الشبكة الطبية. يرجى مراجعة سجلات الخادم (Logs) وإعادة تحميل الصفحة.");
         }
     }
 
     function populateSelect(selectElement, values) {
         const currentVal = selectElement.value;
+        const filteredValues = values.filter(v => v && v.trim() !== ''); // تجاهل القيم الفارغة
         selectElement.innerHTML = selectElement.options[0].outerHTML;
         const fragment = document.createDocumentFragment();
-        values.forEach(value => {
+        [...new Set(filteredValues)].sort().forEach(value => {
             const option = document.createElement('option');
             option.value = value;
             option.textContent = value;
@@ -498,22 +511,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         let filteredData = networkData;
         if (governorateFilter.value) filteredData = filteredData.filter(p => p.governorate === governorateFilter.value);
         
-        const availableTypes = [...new Set(filteredData.map(p => p.type))].sort();
-        populateSelect(typeFilter, availableTypes);
+        populateSelect(typeFilter, filteredData.map(p => p.type));
 
         if (typeFilter.value) filteredData = filteredData.filter(p => p.type === typeFilter.value);
         
-        const availableMains = [...new Set(filteredData.map(p => p.specialty_main))].sort();
-        populateSelect(specialtyMainFilter, availableMains);
+        populateSelect(specialtyMainFilter, filteredData.map(p => p.specialty_main));
 
         if (specialtyMainFilter.value) filteredData = filteredData.filter(p => p.specialty_main === specialtyMainFilter.value);
 
-        const availableSubs = [...new Set(filteredData.map(p => p.specialty_sub))].sort();
-        populateSelect(specialtySubFilter, availableSubs);
+        populateSelect(specialtySubFilter, filteredData.map(p => p.specialty_sub));
     }
 
     function initFilters() {
-        populateSelect(governorateFilter, [...new Set(networkData.map(p => p.governorate))].sort());
+        populateSelect(governorateFilter, networkData.map(p => p.governorate));
         updateDependentFilters();
         governorateFilter.addEventListener('change', updateDependentFilters);
         typeFilter.addEventListener('change', updateDependentFilters);
@@ -536,7 +546,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const cardFragment = document.createDocumentFragment();
 
             results.forEach(provider => {
-                const providerCardId = `provider-${provider.id.replace(/[^a-zA-Z0-9]/g, '-')}`;
+                const providerCardId = `provider-${String(provider.id).replace(/[^a-zA-Z0-9]/g, '-')}`;
 
                 const button = document.createElement('button');
                 button.className = 'result-jump-btn';
