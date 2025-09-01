@@ -83,7 +83,7 @@ def ai_search():
         أنت محرك بحث طبي ذكي ومساعد خبير. مهمتك تحليل طلب المستخدم وإرجاع قائمة بمقدمي الخدمة المناسبين من قاعدة البيانات المتوفرة.
 
         قاعدة البيانات (بتنسيق JSON):
-        {json.dumps(network_data, ensure_ascii=False, indent=2)}
+        {json.dumps(network_data[:200], ensure_ascii=False, indent=2)}
 
         طلب المستخدم: "{query}"
 
@@ -91,8 +91,7 @@ def ai_search():
         1.  حلل طلب المستخدم لفهم الخدمة المطلوبة (مثال: "دكتور عظام"، "صيدلية"، "معمل تحاليل") والموقع الجغرافي (مثال: "الهرم"، "الطالبية"، "مصر الجديدة").
         2.  ابحث في قاعدة البيانات عن **كل** مقدمي الخدمة الذين يتطابقون مع الخدمة والموقع المطلوبين. كن مرنًا في البحث، فـ "الطالبية" تقع في "الهرم" وهي جزء من محافظة "الجيزة".
         3.  من النتائج التي وجدتها، اختر **مقدم خدمة واحد فقط** ليكون "الترشيح الأنسب". يمكنك اختيار الأنسب بناءً على اكتمال بياناته أو شهرة اسمه.
-        4.  قم بتنسيق العنوان الخاص بـ "الترشيح الأنسب" ليكون واضحًا ومناسبًا لـ GPS.
-        5.  أعد النتائج على هيئة ملف JSON **فقط**، بدون أي نصوص قبله أو بعده، ويجب أن يحتوي على الحقول التالية:
+        4.  أعد النتائج على هيئة ملف JSON **فقط**، بدون أي نصوص قبله أو بعده، ويجب أن يحتوي على الحقول التالية:
             - `best_match`: قائمة تحتوي على **عنصر واحد فقط** وهو "الترشيح الأنسب".
             - `other_results`: قائمة تحتوي على **باقي** النتائج المطابقة.
         
@@ -107,12 +106,55 @@ def ai_search():
         app.logger.error(f"ERROR in /api/ai-search: {e}", exc_info=True)
         return jsonify({"error": "حدث خطأ داخلي في الخادم."}), 500
 
-# --- باقي دوال الـ API تبقى كما هي تمامًا بدون تغيير ---
-@app.route("/api/recommend", methods=["POST"])
-def recommend_specialty():
-    # ... (الكود لم يتغير)
-    pass
+@app.route("/api/symptoms-search", methods=["POST"])
+def symptoms_search():
+    """
+    Endpoint جديد للبحث بالأعراض والموقع.
+    """
+    try:
+        data = request.get_json()
+        symptoms = data.get('symptoms')
+        location = data.get('location')
+        if not (symptoms and location): return jsonify({"error": "Symptoms or location are missing"}), 400
+
+        network_data = get_network_data()
+        if not network_data: return jsonify({"error": "Network data not available"}), 500
+        
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key: return jsonify({"error": "Server configuration error."}), 500
+
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+
+        prompt = f"""
+        أنت نظام ترشيح طبي ذكي. مهمتك هي مساعدة مريض بناءً على أعراضه وموقعه.
+
+        قاعدة البيانات (بتنسيق JSON):
+        {json.dumps(network_data[:200], ensure_ascii=False, indent=2)}
+
+        أعراض المريض: "{symptoms}"
+        موقع المريض: "{location}"
+        
+        المطلوب منك:
+        1.  استنتج التخصص الطبي الأنسب للأعراض (مثال: "اسنان"، "عظام"، "باطنة").
+        2.  ابحث في قاعدة البيانات عن **كل** مقدمي الخدمة من هذا التخصص في الموقع الذي حدده المريض.
+        3.  من النتائج، اختر **مقدم خدمة واحد فقط** ليكون "الترشيح الأنسب".
+        4.  أعد النتائج على هيئة ملف JSON **فقط** ويجب أن يحتوي على:
+            - `suggested_specialty`: (String) اسم التخصص الذي استنتجته.
+            - `best_match`: قائمة بعنصر واحد هو "الترشيح الأنسب".
+            - `other_results`: قائمة بباقي النتائج.
+
+        إذا لم تجد أي نتائج، أعد القوائم فارغة.
+        """
+        response = model.generate_content(prompt)
+        cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
+        return jsonify(json.loads(cleaned_text))
+    except Exception as e:
+        app.logger.error(f"ERROR in /api/symptoms-search: {e}", exc_info=True)
+        return jsonify({"error": "حدث خطأ داخلي في الخادم."}), 500
+
+
 @app.route("/api/analyze", methods=["POST"])
 def analyze_report():
-    # ... (الكود لم يتغير)
+    # ... (هذا الكود يبقى كما هو) ...
     pass
