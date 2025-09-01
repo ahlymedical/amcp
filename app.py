@@ -37,36 +37,33 @@ def get_network_data():
         # قراءة أول شيت في الملف بغض النظر عن اسمه
         df = pd.read_excel(excel_file_path, sheet_name=0, header=0)
         
-        # <<< تعديل مهم: سنقرأ كل الأعمدة الموجودة في ملفك >>>
-        # سنفترض أن الأعمدة هي 11 عمودًا بالترتيب
-        df = df.iloc[:, :11] 
-        df.columns = [
-            'id', 'governorate', 'area', 'type', 'specialty_main', 
-            'specialty_sub', 'name', 'address', 
-            'phones_1', 'phones_2', 'hotline' 
-            # قمنا بإزالة أعمدة الهاتف 3 و 4 مؤقتًا لتجنب الأخطاء، يمكن إضافتها لاحقًا
-        ]
-
-        df.dropna(subset=['id'], inplace=True)
+        # نحدد عدد الأعمدة التي سنقرأها لتشمل كل الهواتف والهوتلاين
+        # ID, Gov, Area, Type, Main, Sub, Name, Address, Tel1, Tel2, Tel3, Tel4, Hotline -> 13 columns
+        # سنقرأ 13 عمودًا لضمان تغطية كل البيانات المحتملة
+        num_columns_to_read = min(13, len(df.columns))
+        df = df.iloc[:, :num_columns_to_read]
+        
+        df.dropna(subset=[df.columns[0]], inplace=True)
         df = df.astype(str).replace('nan', '')
 
         data_list = []
         for _, row in df.iterrows():
             # دمج كل أرقام الهواتف الموجودة في قائمة واحدة
             phones = []
-            phone_cols = ['phones_1', 'phones_2'] # يمكن إضافة 'phones_3', 'phones_4' هنا
-            for col in phone_cols:
-                phone_val = str(row.get(col, '')).replace('.0', '').strip()
+            # نفترض أن الهواتف تبدأ من العمود التاسع (index 8)
+            for i in range(8, min(12, len(row))): # Tel1, Tel2, Tel3, Tel4
+                phone_val = str(row.iloc[i]).replace('.0', '').strip()
                 if phone_val and phone_val != '0':
                     phones.append(phone_val)
             
-            hotline = str(row.get('hotline', '')).replace('.0', '').strip() or None
+            hotline = str(row.iloc[min(12, len(row)-1)]).replace('.0', '').strip() or None
+            if hotline == '0': hotline = None
             
             item = {
-                'id': row.get('id'), 'governorate': row.get('governorate'), 'area': row.get('area'),
-                'type': row.get('type'), 'specialty_main': row.get('specialty_main'),
-                'specialty_sub': row.get('specialty_sub'), 'name': row.get('name'),
-                'address': row.get('address'), 'phones': phones, 'hotline': hotline
+                'id': row.iloc[0], 'governorate': row.iloc[1], 'area': row.iloc[2],
+                'type': row.iloc[3], 'specialty_main': row.iloc[4],
+                'specialty_sub': row.iloc[5], 'name': row.iloc[6],
+                'address': row.iloc[7], 'phones': phones, 'hotline': hotline
             }
             data_list.append(item)
         
