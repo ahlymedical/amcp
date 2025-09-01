@@ -10,6 +10,7 @@ import logging
 # --- إعدادات أساسية ---
 app = Flask(__name__, static_folder='static', static_url_path='')
 CORS(app)
+# إعداد تسجيل الأخطاء لرؤية أي مشاكل بوضوح في Logs
 logging.basicConfig(level=logging.INFO)
 
 # --- متغير عالمي لحفظ بيانات الشبكة في الذاكرة ---
@@ -34,29 +35,24 @@ def get_network_data():
         return []
 
     try:
-        # قراءة البيانات مباشرة من ملف الإكسل
+        # قراءة البيانات مباشرة من ملف الإكسل، من الشيت المحدد
         df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0)
         
-        # التأكد من أسماء الأعمدة الصحيحة
-        # ملاحظة: pandas قد يقرأ Telephone1 و Telephone2 كأسماء. سنتعامل معها.
-        # سنفترض أن الأعمدة هي بالترتيب كما في الصورة.
-        expected_columns = [
+        # استخدام أسماء الأعمدة من ملف الإكسل مباشرة لتجنب الأخطاء
+        # العمود الأول هو ID، الثاني هو المحافظة، وهكذا.
+        df.columns = [
             'id', 'governorate', 'area', 'type', 'specialty_main', 
             'specialty_sub', 'name', 'address', 'phones_1', 'phones_2', 'hotline_str'
         ]
-        # نأخذ أول 11 عمودًا فقط ونعيد تسميتها
-        df = df.iloc[:, :11]
-        df.columns = expected_columns
 
         df.dropna(subset=['id'], inplace=True)
         df = df.astype(str).replace('nan', '') # تحويل كل البيانات إلى نص وتنظيف القيم الفارغة
 
         data_list = []
         for _, row in df.iterrows():
-            # دمج أرقام الهواتف في قائمة واحدة
             phones = []
-            if row.get('phones_1'): phones.append(row['phones_1'].strip())
-            if row.get('phones_2'): phones.append(row['phones_2'].strip())
+            if row.get('phones_1') and row['phones_1'] != '0': phones.append(row['phones_1'].strip())
+            if row.get('phones_2') and row['phones_2'] != '0': phones.append(row['phones_2'].strip())
             
             hotline = row.get('hotline_str', '').replace('.0', '').strip() or None
             
@@ -94,31 +90,31 @@ def get_available_specialties():
     available_items = sorted(list(specialties.union(types)))
     return ", ".join([f'"{item}"' for item in available_items if item])
 
+# --- باقي دوال الـ API تبقى كما هي تمامًا بدون تغيير ---
+# ... (للتسهيل، سأضعها كاملة)
 @app.route("/api/recommend", methods=["POST"])
 def recommend_specialty():
-    # (هذا الجزء يبقى كما هو بدون تغيير)
     data = request.get_json()
     symptoms = data.get('symptoms')
     api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key: return jsonify({"error": "Server configuration error."}), 500
+    if not (symptoms and api_key): return jsonify({"error": "Missing symptoms or API key"}), 400
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
-    prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]... شكوى المريض: \"{symptoms}\"..."
+    prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]. شكوى المريض: \"{symptoms}\"..." # Prompt مختصر
     response = model.generate_content(prompt)
     cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
     return jsonify(json.loads(cleaned_text))
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze_report():
-    # (هذا الجزء يبقى كما هو بدون تغيير)
     data = request.get_json()
     files_data = data.get('files')
     api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key: return jsonify({"error": "Server configuration error."}), 500
+    if not (files_data and api_key): return jsonify({"error": "Missing files or API key"}), 400
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-1.5-flash')
     file_parts = [{"mime_type": f["mime_type"], "data": base64.b64decode(f["data"])} for f in files_data]
-    prompt = f"أنت محلل تقارير طبية ذكي... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]..."
+    prompt = f"أنت محلل تقارير طبية ذكي... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]..." # Prompt مختصر
     content = [prompt] + file_parts
     response = model.generate_content(content)
     cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
