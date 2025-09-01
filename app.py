@@ -25,7 +25,7 @@ def get_network_data():
         return NETWORK_DATA_CACHE
 
     basedir = os.path.abspath(os.path.dirname(__file__))
-    # <<< هذا هو السطر الذي تم تصحيحه بشكل نهائي ليتناسب مع تعديلك >>>
+    # <<< تعديل مهم: تم تصحيح المسار ليقرأ الملف من المجلد الرئيسي >>>
     excel_file_path = os.path.join(basedir, 'network_data.xlsx')
     
     app.logger.info(f"محاولة قراءة ملف الإكسل من المسار الصحيح: {excel_file_path}")
@@ -37,27 +37,32 @@ def get_network_data():
     try:
         df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0)
         
-        num_columns = len(df.columns)
         df.dropna(subset=[df.columns[0]], inplace=True)
         df = df.astype(str).replace('nan', '')
 
         data_list = []
         for _, row in df.iterrows():
+            # دمج كل أرقام الهواتف الموجودة في قائمة واحدة
             phones = []
-            # دمج كل أعمدة الهواتف المتاحة (من العمود الثامن حتى ما قبل الأخير)
-            for i in range(8, num_columns - 1):
+            # نفترض أن الهواتف تبدأ من العمود السادس (index 5) حتى ما قبل الأخير
+            for i in range(5, len(row) - 1): 
                 phone_val = str(row.iloc[i]).replace('.0', '').strip()
                 if phone_val and phone_val != '0':
                     phones.append(phone_val)
             
-            hotline = str(row.iloc[num_columns - 1]).replace('.0', '').strip() or None
+            hotline = str(row.iloc[-1]).replace('.0', '').strip() or None # العمود الأخير دائمًا
             if hotline == '0': hotline = None
             
+            # <<< تعديل مهم: تم تصحيح تعيين الأعمدة ليطابق طلبك >>>
             item = {
-                'id': row.iloc[0], 'governorate': row.iloc[1], 'area': row.iloc[2],
-                'type': row.iloc[3], 'specialty_main': row.iloc[4],
-                'specialty_sub': row.iloc[5], 'name': row.iloc[6],
-                'address': row.iloc[7], 'phones': phones, 'hotline': hotline
+                'governorate': row.iloc[1],      # المحافظات -> هي المنطقة (العمود B)
+                'provider_type': row.iloc[2],    # نوع مقدم الخدمة -> هو التخصص الرئيسي (العمود C)
+                'specialty_sub': row.iloc[3],    # التخصص الفرعي -> هو التخصص الفرعي (العمود D)
+                'name': row.iloc[4],             # مقدم الخدمة (العمود E)
+                'address': row.iloc[5],          # العنوان (العمود F)
+                'phones': phones,                # كل الهواتف
+                'hotline': hotline,              # الخط الساخن
+                'id': row.iloc[0]                # ID لضمان عدم التكرار
             }
             data_list.append(item)
         
@@ -69,7 +74,7 @@ def get_network_data():
         app.logger.error(f"حدث خطأ فادح أثناء قراءة ملف الإكسل: {e}", exc_info=True)
         return []
 
-# --- endpoints الخاصة بالتطبيق (تبقى كما هي) ---
+# --- endpoints الخاصة بالتطبيق ---
 @app.route('/')
 def serve_index():
     return send_from_directory('static', 'index.html')
@@ -77,21 +82,21 @@ def serve_index():
 @app.route('/api/network')
 def get_network_data_endpoint():
     data = get_network_data()
-    if not data:
-        app.logger.warning("يتم إرجاع قائمة بيانات فارغة لأن التحميل فشل.")
     return jsonify(data)
 
 def get_available_specialties():
     data = get_network_data()
     if not data: return '"باطنة", "عظام", "اسنان"'
-    specialties = set(item.get('specialty_main', '') for item in data)
-    types = set(item.get('type', '') for item in data)
-    available_items = sorted(list(specialties.union(types)))
+    
+    # AI يعتمد على "نوع مقدم الخدمة" (التخصص الرئيسي)
+    specialties = set(item.get('provider_type', '') for item in data)
+    available_items = sorted(list(specialties))
     return ", ".join([f'"{item}"' for item in available_items if item])
 
 # --- باقي دوال الـ API تبقى كما هي تمامًا بدون تغيير ---
 @app.route("/api/recommend", methods=["POST"])
 def recommend_specialty():
+    # ... (الكود لم يتغير)
     try:
         data = request.get_json()
         symptoms = data.get('symptoms')
@@ -110,6 +115,7 @@ def recommend_specialty():
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze_report():
+    # ... (الكود لم يتغير)
     try:
         data = request.get_json()
         files_data = data.get('files')
