@@ -318,12 +318,6 @@
     .location-map iframe { width: 100%; height: 100%; border: 0; }
     .location-address { margin-top: 15px; font-size: 16px; color: var(--text-muted); line-height: 1.7; }
 
-    /* --- بداية التعديل المطلوب --- */
-    #specialty-sub-filter {
-        grid-column: 1 / -1;
-    }
-    /* --- نهاية التعديل المطلوب --- */
-
 </style>
 </head>
 <body>
@@ -356,17 +350,15 @@
     <div class="feature-box" id="search-box">
         <h2> <i class="fa-solid fa-magnifying-glass"></i> البحث المتقدم في الشبكة الطبية <span class="en-subtitle">Advanced Network Search</span></h2>
         <div class="filter-grid">
+            <!-- <<< تعديل مهم: تم حذف الزر الرابع وأصبحت 3 فلاتر فقط >>> -->
             <select id="governorate-filter">
-                <option value="">كل المحافظات / All Governorates</option>
+                <option value="">كل المحافظات</option>
             </select>
-            <select id="type-filter">
-                <option value="">نوع مقدم الخدمة / Provider Type</option>
-            </select>
-            <select id="specialty-main-filter">
-                <option value="">التخصص الرئيسي / Main Specialty</option>
+            <select id="provider-type-filter">
+                <option value="">نوع مقدم الخدمة</option>
             </select>
             <select id="specialty-sub-filter">
-                <option value="">التخصص الفرعي / Sub-specialty</option>
+                <option value="">التخصص الفرعي</option>
             </select>
         </div>
         <button id="provider-search-btn"><i class="fa-solid fa-search"></i> ابحث / Search</button>
@@ -463,9 +455,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         return specialtyIcons['default'];
     }
     
+    // <<< تعديل مهم: تم تحديث أسماء العناصر لتطابق الفلاتر الجديدة >>>
     const governorateFilter = document.getElementById('governorate-filter');
-    const typeFilter = document.getElementById('type-filter');
-    const specialtyMainFilter = document.getElementById('specialty-main-filter');
+    const providerTypeFilter = document.getElementById('provider-type-filter');
     const specialtySubFilter = document.getElementById('specialty-sub-filter');
     const searchBtn = document.getElementById('provider-search-btn');
     const intermediateResultsContainer = document.getElementById('intermediate-results-container');
@@ -507,24 +499,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         selectElement.value = currentVal;
     }
 
+    // <<< تعديل مهم: تم تحديث منطق الفلاتر بالكامل >>>
     function updateDependentFilters() {
         let filteredData = networkData;
+        
         if (governorateFilter.value) {
             filteredData = filteredData.filter(p => p.governorate === governorateFilter.value);
         }
         
-        populateSelect(typeFilter, filteredData.map(p => p.type));
+        populateSelect(providerTypeFilter, filteredData.map(p => p.provider_type));
 
-        if (typeFilter.value) {
-            filteredData = filteredData.filter(p => p.type === typeFilter.value);
+        if (providerTypeFilter.value) {
+            filteredData = filteredData.filter(p => p.provider_type === providerTypeFilter.value);
         }
         
-        populateSelect(specialtyMainFilter, filteredData.map(p => p.specialty_main));
-
-        if (specialtyMainFilter.value) {
-            filteredData = filteredData.filter(p => p.specialty_main === specialtyMainFilter.value);
-        }
-
         populateSelect(specialtySubFilter, filteredData.map(p => p.specialty_sub));
     }
 
@@ -532,10 +520,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         populateSelect(governorateFilter, networkData.map(p => p.governorate));
         updateDependentFilters();
         governorateFilter.addEventListener('change', updateDependentFilters);
-        typeFilter.addEventListener('change', updateDependentFilters);
-        specialtyMainFilter.addEventListener('change', updateDependentFilters);
+        providerTypeFilter.addEventListener('change', updateDependentFilters);
     }
     
+    // <<< تعديل مهم: تم تحديث منطق عرض النتائج بالكامل >>>
     function renderResults(results) {
         intermediateResultsContainer.innerHTML = '';
         networkContainer.innerHTML = '';
@@ -545,33 +533,31 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (results.length > 0) {
             const title = document.createElement('h2');
             title.className = 'section-title';
-            title.textContent = 'نتائج البحث: اختر لعرض التفاصيل';
+            title.textContent = `نتائج البحث (${results.length})`;
             intermediateResultsContainer.appendChild(title);
 
-            const buttonFragment = document.createDocumentFragment();
             const cardFragment = document.createDocumentFragment();
 
             results.forEach(provider => {
                 const providerCardId = `provider-${String(provider.id).replace(/[^a-zA-Z0-9]/g, '-')}`;
 
-                const button = document.createElement('button');
-                button.className = 'result-jump-btn';
-                button.dataset.targetId = `#${providerCardId}`;
-                button.innerHTML = `<span>${provider.name}</span> <i class="fa-solid fa-arrow-down"></i>`;
-                buttonFragment.appendChild(button);
-
                 const card = document.createElement('div');
                 card.className = 'provider-card';
                 card.id = providerCardId;
                 
-                let phonesHTML = provider.phones && provider.phones.length > 0 ? provider.phones.filter(p => p).map(phone => `<span><i class="fa-solid fa-phone"></i> ${phone}</span>`).join('') : '';
-                let hotlineHTML = provider.hotline ? `<span><i class="fa-solid fa-headset"></i> ${provider.hotline}</span>` : '';
+                let phonesHTML = provider.phones && provider.phones.length > 0 
+                    ? provider.phones.map(phone => `<span><i class="fa-solid fa-phone"></i> ${phone}</span>`).join('') 
+                    : '';
+                
+                let hotlineHTML = provider.hotline 
+                    ? `<span><i class="fa-solid fa-headset"></i> ${provider.hotline}</span>` 
+                    : '';
 
                 card.innerHTML = `
-                    <div class="provider-name">${provider.name}</div>
+                    <div class="provider-name">${provider.name || 'غير متوفر'}</div>
                     <div class="provider-details">
                         <span><i class="fa-solid fa-location-dot"></i> ${provider.address || 'غير متوفر'}</span>
-                        <span><i class="fa-solid fa-tag"></i> ${provider.type || ''} / ${provider.specialty_main || ''} / ${provider.specialty_sub || ''}</span>
+                        <span><i class="fa-solid fa-tag"></i> ${provider.provider_type || ''} / ${provider.specialty_sub || ''}</span>
                     </div>
                     <div class="provider-contact">${phonesHTML}${hotlineHTML}</div>
                     <div class="provider-nav">
@@ -581,8 +567,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                 `;
                 cardFragment.appendChild(card);
             });
-
-            intermediateResultsContainer.appendChild(buttonFragment);
             networkContainer.appendChild(cardFragment);
         }
     }
@@ -590,8 +574,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     searchBtn.addEventListener('click', () => {
         const results = networkData.filter(p => 
             (!governorateFilter.value || p.governorate === governorateFilter.value) &&
-            (!typeFilter.value || p.type === typeFilter.value) &&
-            (!specialtyMainFilter.value || p.specialty_main === specialtyMainFilter.value) &&
+            (!providerTypeFilter.value || p.provider_type === providerTypeFilter.value) &&
             (!specialtySubFilter.value || p.specialty_sub === specialtySubFilter.value)
         );
         renderResults(results);
@@ -719,10 +702,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         const serviceKeywords = serviceQuery.split(' ').filter(k => k.length > 1);
 
         const results = networkData.filter(provider => {
-            const areaMatch = (provider.governorate || '').toLowerCase().includes(areaQuery) || (provider.area || '').toLowerCase().includes(areaQuery);
+            const areaMatch = (provider.governorate || '').toLowerCase().includes(areaQuery);
             if (!areaMatch) return false;
 
-            const providerInfoString = `${provider.type} ${provider.specialty_main} ${provider.specialty_sub} ${provider.name}`.toLowerCase();
+            const providerInfoString = `${provider.provider_type} ${provider.specialty_sub} ${provider.name}`.toLowerCase();
             return serviceKeywords.some(keyword => providerInfoString.includes(keyword));
         });
 
@@ -747,7 +730,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const specialty = event.target.dataset.specialty;
             const selectElement = event.target.closest('.find-provider-section').querySelector('.ai-governorate-select');
             if (!selectElement.value) { alert('يرجى اختيار المنطقة أولاً.'); return; }
-            const results = networkData.filter(p => p.governorate === selectElement.value && ((p.specialty_main || '').toLowerCase().includes(specialty.toLowerCase()) || (p.type || '').toLowerCase().includes(specialty.toLowerCase())));
+            const results = networkData.filter(p => p.governorate === selectElement.value && ((p.provider_type || '').toLowerCase().includes(specialty.toLowerCase())));
             renderResults(results);
             intermediateResultsContainer.scrollIntoView({ behavior: 'smooth' });
         }
