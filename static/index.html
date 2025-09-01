@@ -1,915 +1,218 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <!-- ============== Meta Tags and Title ============== -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>البحث الذكي في الشبكة الطبية - الأهلي للخدمات الطبية</title>
-
-    <!-- ============== External Libraries (Icons and Fonts) ============== -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-
-    <!-- ============== Professional CSS Styles ============== -->
-    <style>
-        :root {
-            --primary-green: #006A4E;
-            --secondary-green: #00583E;
-            --primary-orange: #F58220;
-            --accent-light-green: #E6F0ED;
-            --white: #ffffff;
-            --light-gray: #f8f9fa;
-            --medium-gray: #e9ecef;
-            --text-dark: #2c3e50;
-            --text-muted: #7f8c8d;
-            --danger-red: #e74c3c;
-            --success-green: #2ecc71;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-            --border-radius: 12px;
-            --font-family-cairo: 'Cairo', sans-serif;
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: var(--font-family-cairo);
-            background-color: var(--light-gray);
-            color: var(--text-dark);
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem 0;
-        }
-
-        /* --- Header --- */
-        .main-header {
-            background-color: var(--white);
-            padding: 1rem 0;
-            box-shadow: var(--shadow-md);
-            text-align: center;
-            border-bottom: 5px solid var(--primary-green);
-        }
-
-        .main-header img {
-            max-width: 250px;
-            height: auto;
-        }
-
-        /* --- Main Search Section --- */
-        .search-section {
-            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
-            color: var(--white);
-            padding: 4rem 2rem;
-            text-align: center;
-            border-radius: 0 0 var(--border-radius) var(--border-radius);
-            box-shadow: var(--shadow-md);
-        }
-
-        .search-section h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .search-section p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
-
-        .search-tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 2rem;
-            border-radius: var(--border-radius);
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 0.5rem;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            color: var(--white);
-            padding: 0.8rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .tab-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .tab-btn.active {
-            background-color: var(--primary-orange);
-            color: var(--white);
-            box-shadow: var(--shadow-md);
-        }
-        
-        .search-panel { display: none; }
-        .search-panel.active { display: block; }
-        
-        /* --- Search by Symptoms Panel --- */
-        .symptom-search-box {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .symptom-search-box textarea {
-            width: 100%;
-            max-width: 700px;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            border: 2px solid transparent;
-            font-family: var(--font-family-cairo);
-            font-size: 1.1rem;
-            resize: vertical;
-            min-height: 100px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-
-        .symptom-search-box textarea:focus {
-            outline: none;
-            border-color: var(--primary-orange);
-            box-shadow: 0 0 0 3px rgba(245, 130, 32, 0.5);
-        }
-
-        @keyframes shake {
-            10%, 90% { transform: translateX(-1px); }
-            20%, 80% { transform: translateX(2px); }
-            30%, 50%, 70% { transform: translateX(-4px); }
-            40%, 60% { transform: translateX(4px); }
-        }
-        .input-error {
-            animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
-            border: 2px solid var(--danger-red) !important;
-        }
-
-        .symptom-search-box .search-btn {
-            padding: 0.8rem 2.5rem;
-            font-size: 1.2rem;
-            font-weight: 700;
-            background-color: var(--primary-orange);
-            color: var(--white);
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
-        
-        .symptom-search-box .search-btn:hover {
-            background-color: #e07015;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-        .symptom-search-box .search-btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        
-        /* --- Search by Reports Panel --- */
-        #report-upload-area {
-            border: 3px dashed rgba(255, 255, 255, 0.5);
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            max-width: 700px;
-            margin: auto;
-        }
-        #report-upload-area.drag-over {
-            border-color: var(--primary-orange);
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        #report-upload-area p {
-            margin: 0;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-        }
-        .report-previews {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 1.5rem;
-        }
-        .preview-item {
-            background: var(--white);
-            color: var(--text-dark);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: var(--shadow-sm);
-            font-size: 0.9rem;
-        }
-        .file-icon { display: flex; align-items: center; gap: 0.5rem; }
-        .file-icon i { color: var(--primary-green); }
-        .remove-file-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--danger-red); }
-
-        #analyze-reports-btn {
-             margin-top: 1.5rem;
-             padding: 0.8rem 2.5rem;
-             font-size: 1.2rem;
-             font-weight: 700;
-             background-color: var(--success-green);
-             color: var(--white);
-             border: none;
-             border-radius: var(--border-radius);
-             cursor: pointer;
-             transition: all 0.3s ease;
-             display: flex;
-             align-items: center;
-             gap: 0.7rem;
-        }
-        #analyze-reports-btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-         #analyze-reports-btn:hover:not(:disabled) {
-            background-color: #27ae60;
-            transform: translateY(-2px);
-        }
-
-        /* --- Results Section --- */
-        #results-section { padding-top: 3rem; }
-        #results-container {
-            display: grid;
-            gap: 1.5rem;
-        }
-        .loader {
-            text-align: center;
-            padding: 3rem;
-        }
-        .loader .fa-spinner {
-            font-size: 3rem;
-            color: var(--primary-green);
-        }
-        .info-message {
-            background-color: var(--white);
-            border-radius: var(--border-radius);
-            padding: 2rem;
-            text-align: center;
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            box-shadow: var(--shadow-sm);
-        }
-        .info-message i {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: 1rem;
-            color: var(--primary-green);
-        }
-        .error-message {
-            background-color: #fff2f2;
-            color: var(--danger-red);
-            border: 1px solid #ffcccc;
-            border-radius: var(--border-radius);
-            padding: 1.5rem;
-            text-align: center;
-        }
-        
-        /* --- Analysis Result Card --- */
-        .analysis-card {
-            background-color: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            margin-bottom: 2rem;
-            border-left: 5px solid var(--primary-orange);
-            overflow: hidden;
-        }
-        .analysis-header {
-            background-color: var(--accent-light-green);
-            padding: 1.5rem;
-            color: var(--primary-green);
-            font-weight: 700;
-            font-size: 1.3rem;
-        }
-        .analysis-header i { margin-left: 0.7rem; }
-        .analysis-body { padding: 1.5rem; }
-        .analysis-body h3 {
-            font-size: 1.2rem;
-            color: var(--primary-green);
-            margin-bottom: 0.8rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid var(--medium-gray);
-        }
-        .analysis-body p, .analysis-body ul { margin-bottom: 1.5rem; color: var(--text-dark); }
-        .analysis-body ul { list-style-type: none; padding-right: 0; }
-        .analysis-body li {
-            background-color: var(--light-gray);
-            padding: 0.8rem;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-        .analysis-body li::before {
-            font-family: "Font Awesome 6 Free";
-            content: "\f0a9";
-            font-weight: 900;
-            color: var(--primary-orange);
-        }
-        .analysis-disclaimer {
-            background-color: #fff9e6;
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: #8c6d32;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        /* --- Provider Card --- */
-        .provider-card {
-            background-color: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid transparent;
-        }
-        .provider-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
-        }
-        
-        .recommendation-badge {
-            position: absolute;
-            top: -1px;
-            right: -1px;
-            background-color: var(--primary-orange);
-            color: var(--white);
-            padding: 0.5rem 1.5rem 0.5rem 2rem;
-            font-weight: 700;
-            font-size: 0.9rem;
-            border-radius: 0 0 0 var(--border-radius);
-            clip-path: polygon(100% 0, 100% 100%, 0 100%, 15% 0);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .provider-card.recommended {
-            border-color: var(--primary-orange);
-            box-shadow: 0 0 15px rgba(245, 130, 32, 0.4);
-        }
-
-        .provider-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .provider-icon {
-            font-size: 2rem;
-            color: var(--primary-green);
-            background-color: var(--accent-light-green);
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-
-        .provider-title h2 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .provider-title p {
-            font-size: 1rem;
-            color: var(--text-muted);
-            margin: 0;
-        }
-
-        .provider-details {
-            list-style: none;
-            padding: 0;
-            border-top: 1px solid var(--medium-gray);
-            padding-top: 1rem;
-        }
-
-        .provider-details li {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 0.8rem;
-            font-size: 1rem;
-        }
-        .provider-details li i {
-            color: var(--primary-orange);
-            font-size: 1.2rem;
-            margin-top: 4px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .provider-details a {
-            color: var(--primary-green);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s;
-        }
-        .provider-details a:hover {
-            color: var(--primary-orange);
-            text-decoration: underline;
-        }
-        .phones-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-        }
-
-        /* --- Scroll Buttons --- */
-        .scroll-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background-color: var(--primary-green);
-            color: var(--white);
-            border: none;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
-            opacity: 0;
-            visibility: hidden;
-            z-index: 1000;
-        }
-        .scroll-btn:hover {
-            background-color: var(--secondary-green);
-            transform: scale(1.1);
-        }
-        .scroll-btn.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        #scrollToDown {
-            right: auto;
-            left: 20px;
-            background-color: var(--primary-orange);
-            display: none; /* Hidden by default */
-        }
-         #scrollToDown:hover {
-             background-color: #e07015;
-         }
-
-        /* --- Footer Section --- */
-        .main-footer {
-            background-color: var(--text-dark);
-            color: var(--white);
-            padding: 3rem 0;
-            text-align: center;
-        }
-        #company-map {
-            margin-bottom: 2rem;
-        }
-        #company-map iframe {
-            border-radius: var(--border-radius);
-            border: 3px solid var(--primary-green);
-            width: 100%;
-            max-width: 800px;
-            height: 400px;
-        }
-        .footer-content p {
-            margin-bottom: 0.5rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .search-section h1 { font-size: 2rem; }
-            .search-section p { font-size: 1rem; }
-            .search-tabs { flex-direction: column; }
-            .tab-btn { justify-content: center; }
-        }
-
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الشبكة الطبية - الأهلي للخدمات الطبية</title>
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    /* === تم الإبقاء على كل أكواد التصميم الأصلية بدون أي تغيير === */
+    :root {
+        --primary-green: #006A4E; --primary-orange: #F58220; --accent-light-green: #E6F0ED;
+        --white: #ffffff; --light-gray: #f0f2f5; --medium-gray: #e9ecef;
+        --text-dark: #212529; --text-muted: #6c757d; --danger-red: #dc3545;
+        --primary-glow: rgba(0, 106, 78, 0.3); --star-yellow: #FFC107;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Cairo', sans-serif; background-color: var(--light-gray); margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; color: var(--text-dark); line-height: 1.7; }
+    .logo-container-full-width { width: 100%; background: var(--white); text-align: center; padding: 20px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .logo-image { max-width: 900px; width: 90%; height: auto; }
+    .page { background: var(--white); width: 100%; max-width: 900px; padding: 25px; box-shadow: 0 5px 30px rgba(0,0,0,0.1); border-radius: 15px; box-sizing: border-box; overflow: hidden; margin: 20px 15px; }
+    .info-professional { background-color: var(--accent-light-green); border-radius: 10px; padding: 20px; margin-bottom: 25px; text-align: right; border: 1px solid var(--medium-gray); }
+    .info-professional h1 { font-size: 20px; margin-top: 0; margin-bottom: 5px; color: var(--primary-green); }
+    .info-professional .en-title { font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--text-muted); margin-bottom: 20px; display: block; }
+    .info-professional .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+    .info-item { display: flex; align-items: center; gap: 15px; }
+    .info-item i { font-size: 22px; color: var(--primary-orange); width: 25px; text-align: center; }
+    .info-item-text a { color: var(--text-dark); text-decoration: none; font-weight: 600; }
+    .info-item-text .en { font-family: 'Poppins', sans-serif; font-size: 0.8em; color: var(--text-muted); display: block; }
+    .feature-box { text-align: right; margin-bottom: 25px; padding: 20px; background-color: var(--accent-light-green); border: 1px solid var(--medium-gray); border-radius: 10px; }
+    .feature-box h2 { font-size: 18px; color: var(--primary-green); margin-top: 0; margin-bottom: 5px; }
+    .feature-box h2 .en-subtitle { font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 400; color: var(--text-muted); display: block; margin-top: 2px; }
+    .feature-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+    /* --- تم تعديل هذا الجزء فقط ليلائم المدخلات الجديدة (Textarea, input) بدلاً من (select) --- */
+    .feature-box textarea, .feature-box input[type="text"] { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Cairo', sans-serif; font-size: 14px; box-sizing: border-box; background-color: var(--white); margin-bottom: 10px; }
+    .feature-box button { background-color: var(--primary-green); color: var(--white); border: none; padding: 12px 25px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.3s; width: 100%; margin-top: 10px; }
+    .feature-box button:hover:not(:disabled) { background-color: #005a41; }
+    .feature-box button:disabled { background-color: #999; cursor: not-allowed; }
+    .loader { border: 4px solid var(--medium-gray); border-top: 4px solid var(--primary-green); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .results-area { margin-top: 30px; } .section-title { font-size: 22px; color: var(--primary-green); padding-bottom: 10px; margin-bottom: 20px; border-bottom: 3px solid var(--primary-orange); }
+    /* --- التصميم الاحترافي لبطاقة النتائج كما طلبت --- */
+    .provider-card { background-color: var(--white); border: 1px solid var(--medium-gray); border-radius: 12px; margin-bottom: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .provider-card.best-match { border: 2px solid var(--primary-green); box-shadow: 0 8px 25px var(--primary-glow); }
+    .best-match-badge { position: absolute; top: 18px; left: -50px; background-color: var(--primary-green); color: white; padding: 5px 50px; font-size: 12px; font-weight: bold; transform: rotate(-45deg); display: flex; align-items: center; gap: 8px; }
+    .best-match-badge .fa-star { color: var(--star-yellow); font-size: 14px; }
+    .provider-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+    .provider-icon { width: 50px; height: 50px; background-color: var(--accent-light-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--primary-green); flex-shrink: 0; }
+    .provider-name { font-size: 18px; font-weight: 700; color: var(--text-dark); }
+    .provider-specialty { font-size: 14px; color: var(--text-muted); }
+    .provider-info-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--medium-gray); }
+    .provider-info-item { display: flex; align-items: flex-start; gap: 12px; font-size: 15px; }
+    .provider-info-item i { color: var(--primary-orange); width: 20px; text-align: center; margin-top: 3px; font-size: 16px; }
+    .provider-info-item .phones-list { display: flex; flex-wrap: wrap; gap: 10px; font-family: 'Poppins', sans-serif; font-weight: 600; }
+    .provider-info-item .phones-list span { background-color: var(--light-gray); padding: 2px 8px; border-radius: 5px; }
+    .provider-nav { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--medium-gray); }
+    .nav-btn { background-color: var(--accent-light-green); border: 1px solid var(--medium-gray); color: var(--primary-green); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; transition: all 0.2s ease-in-out; font-size: 16px; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+    .nav-btn:hover { background-color: var(--primary-green); color: var(--white); transform: scale(1.1); }
+    .nav-btn.map-btn { background-color: var(--primary-orange); color: var(--white); }
+    .nav-btn.map-btn:hover { background-color: #d9711c; }
+    #no-results { text-align: center; padding: 40px 20px; background-color: var(--accent-light-green); border-radius: 8px; color: var(--text-muted); font-weight: 600; display: none; }
+    .analysis-card { background-color: var(--white); border: 2px solid var(--primary-green); box-shadow: 0 0 20px var(--primary-glow); border-radius: 10px; padding: 20px; text-align: right; }
+    .analysis-card .disclaimer { background-color: #fff3cd; border-right: 5px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .analysis-card .disclaimer strong { color: #856404; }
+    .analysis-section-title { font-size: 18px; font-weight: 700; color: var(--primary-green); margin-top: 20px; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid var(--primary-orange); }
+    .analysis-card ul { padding-right: 20px; margin: 0; } .analysis-card li { margin-bottom: 10px; line-height: 1.8; }
+    .next-step-guidance { margin-top: 20px; padding: 15px; background-color: var(--accent-light-green); border-radius: 8px; text-align: center; font-weight: 600; }
+    .upload-area { border: 2px dashed #ccc; border-radius: 10px; padding: 20px; margin-bottom: 15px; transition: border-color 0.3s, background-color 0.3s; }
+    .upload-area.drag-over { border-color: var(--primary-green); background-color: var(--accent-light-green); }
+    #report-files-input { display: none; } .upload-label { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); text-align: center; } .upload-label i { font-size: 36px; margin-bottom: 10px; color: var(--primary-green); } #file-preview-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; justify-content: center; } .preview-item { position: relative; width: 80px; height: 80px; } .preview-item .file-icon { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background-color: var(--light-gray); border-radius: 8px; border: 1px solid #ddd; } .preview-item .file-icon i { font-size: 30px; color: var(--primary-green); } .preview-item .file-icon span { font-size: 10px; color: var(--text-muted); margin-top: 5px; word-break: break-all; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-align: center; } .remove-file-btn { position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; background-color: var(--danger-red); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; z-index: 1; }
+    .location-section { margin-top: 40px; text-align: center; } .location-section h2 { font-size: 20px; color: var(--primary-green); margin-bottom: 15px; } .location-map { position: relative; width: 100%; height: 300px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; } .location-map iframe { width: 100%; height: 100%; border: 0; } .location-address { margin-top: 15px; font-size: 16px; color: var(--text-muted); line-height: 1.7; }
+</style>
 </head>
 <body>
-
-    <!-- ==================== Header ==================== -->
-    <header class="main-header">
-        <img src="https://i.ibb.co/p3y8F56/image-3e131f.png" alt="شعار الأهلي للخدمات الطبية">
-    </header>
-
-    <main>
-        <!-- ==================== AI Search Section ==================== -->
-        <section class="search-section" id="search-section">
-            <h1>مساعدك الطبي الذكي</h1>
-            <p>ابحث عن أفضل مقدمي الخدمة الطبية بكل سهولة ودقة</p>
-            
-            <div class="search-tabs">
-                <button class="tab-btn active" data-tab="symptoms"><i class="fa-solid fa-stethoscope"></i> البحث بالأعراض والمكان</button>
-                <button class="tab-btn" data-tab="reports"><i class="fa-solid fa-file-medical"></i> البحث بالتقارير والتحاليل</button>
-            </div>
-
-            <!-- Panel 1: Search by Symptoms -->
-            <div id="symptoms-panel" class="search-panel active">
-                <div class="symptom-search-box">
-                    <textarea id="symptom-query" rows="4" placeholder="أهلاً بك، أنا مساعدك الطبي. كيف يمكنني مساعدتك اليوم؟\nمثال: أنا من الطالبية هرم، وأشعر بإرهاق عام في الجسم وصداع شديد..."></textarea>
-                    <button id="symptom-search-btn" class="search-btn">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <span>ابحث الآن</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Panel 2: Search by Reports -->
-            <div id="reports-panel" class="search-panel">
-                <div id="report-upload-area">
-                     <p><i class="fa-solid fa-cloud-arrow-up fa-2x"></i> <span>اسحب وأفلت الملفات هنا أو اضغط للاختيار (صور، PDF، مستندات)</span></p>
-                     <input type="file" id="report-file-input" multiple hidden accept="image/*,.pdf,.doc,.docx">
-                </div>
-                <div class="report-previews" id="report-previews-container"></div>
-                <center>
-                    <button id="analyze-reports-btn" disabled>
-                        <i class="fa-solid fa-brain"></i>
-                        <span>حلل وارشح</span>
-                    </button>
-                </center>
-            </div>
-
-        </section>
-
-        <!-- ==================== Results Section ==================== -->
-        <section id="results-section" class="container">
-            <div id="results-container">
-                 <div class="info-message">
-                    <i class="fa-solid fa-circle-info"></i>
-                    <p>نتائج البحث ستظهر هنا. ابدأ باستخدام أحد الخيارات أعلاه.</p>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- ==================== Footer with Map ==================== -->
-    <footer class="main-footer" id="footer-section">
-        <div class="container">
-            <div id="company-map">
-                 <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3456.336495748215!2d31.20786331511333!3d29.96981898190989!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1458479e09756805%3A0x45422616a322159c!2sEl-Ahly%20Medical%20Company!5e0!3m2!1sen!2seg!4v1646309852070!5m2!1sen!2seg" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-            </div>
-            <div class="footer-content">
-                <p>الأهلي للخدمات الطبية © 2024. جميع الحقوق محفوظة.</p>
-                <p>مقر الشركة الرئيسي: 12 شارع المبتديان، القصر العيني، القاهرة.</p>
-            </div>
+<div class="logo-container-full-width">
+    <img src="https://i.ibb.co/JFMjRLSf/Cover-Linkedin-AMC-new.png" alt="AMC Logo" class="logo-image">
+</div>
+<div class="page" id="page-top">
+    <div class="info-professional">
+        <h1>دليل مقدمي الخدمة الطبية <span class="en-title">Medical Network Directory</span></h1>
+        <div class="info-grid">
+            <div class="info-item"><i class="fa-solid fa-phone"></i><div class="info-item-text">الخط الساخن: <strong>19462</strong> <span class="en">HOTLINE</span></div></div>
+            <div class="info-item"><i class="fa-solid fa-globe"></i><div class="info-item-text"><a href="https://www.ahlymedical.com/" target="_blank">www.ahlymedical.com</a> <span class="en">Our Website</span></div></div>
+            <div class="info-item"><i class="fa-solid fa-map-marker-alt"></i><div class="info-item-text"> 57 برج الجامعة، شارع مراد، الجيزة <span class="en">57 El Gamaa Tower, Mourad St, Giza</span> </div></div>
         </div>
-    </footer>
-    
-    <!-- ==================== Scroll Buttons ==================== -->
-    <button id="scrollToTop" class="scroll-btn"><i class="fa-solid fa-arrow-up"></i></button>
-    <button id="scrollToDown" class="scroll-btn"><i class="fa-solid fa-arrow-down"></i></button>
+    </div>
 
-
-    <!-- ==================== JavaScript Logic ==================== -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- API Endpoint Configuration ---
-        const API_URL = window.location.origin;
-
-        // --- DOM Element References ---
-        const tabs = document.querySelectorAll('.tab-btn');
-        const panels = document.querySelectorAll('.search-panel');
-        const symptomQuery = document.getElementById('symptom-query');
-        const symptomSearchBtn = document.getElementById('symptom-search-btn');
-        const resultsContainer = document.getElementById('results-container');
+    <!-- ===== تعديل رئيسي هنا: الحفاظ على الصندوق الأصلي مع تغيير محتواه ===== -->
+    <div class="feature-box" id="search-box">
+        <h2> <i class="fa-solid fa-magnifying-glass"></i> البحث الذكي في الشبكة الطبية <span class="en-subtitle">Smart AI Search</span></h2>
+        <p>صف الأعراض التي تشعر بها وحدد موقعك، وسيقوم المساعد الذكي بترشيح مقدم الخدمة الأنسب لك.</p>
         
-        // Report upload elements
-        const uploadArea = document.getElementById('report-upload-area');
-        const fileInput = document.getElementById('report-file-input');
-        const previewContainer = document.getElementById('report-previews-container');
+        <!-- تم استبدال الفلاتر القديمة بهذه المدخلات الجديدة -->
+        <textarea id="symptoms-input" rows="3" placeholder="اكتب الأعراض هنا... مثال: أشعر بألم شديد في الظهر مع صعوبة في الحركة"></textarea>
+        <input type="text" id="location-input" placeholder="اكتب المنطقة أو المحافظة هنا... مثال: الطالبية هرم أو الجيزة">
+        
+        <button id="symptoms-search-btn"><i class="fa-solid fa-robot"></i> أرشدني لأفضل مقدم خدمة</button>
+        <div id="loader-symptoms" class="loader"></div>
+    </div>
+
+    <!-- ===== هذا الصندوق بقي كما هو في التصميم الأصلي ===== -->
+    <div class="feature-box">
+        <h2><i class="fa-solid fa-microscope"></i> تحليل التقارير الطبية بالذكاء الاصطناعي <span class="en-subtitle">AI Report Analysis</span></h2>
+        <p>ارفع تقاريرك أو التحاليل الطبية (صور أو PDF)، وسيقوم المساعد الذكي بتحليلها وتقديم شرح ونصائح أولية.</p>
+        <div class="upload-area" id="upload-area">
+            <input type="file" id="report-files-input" multiple accept="image/png, image/jpeg, image/webp, application/pdf">
+            <label for="report-files-input" class="upload-label">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>اختر ملفات التقارير أو اسحبها إلى هنا</span>
+            </label>
+        </div>
+        <div id="file-preview-container"></div>
+        <button id="analyze-reports-btn" disabled><i class="fa-solid fa-file-medical"></i> حلل التقارير</button>
+        <div id="loader-analysis" class="loader"></div>
+    </div>
+
+    <!-- ===== قسم عرض النتائج الديناميكي ===== -->
+    <div class="results-area" id="results-area">
+        <div id="ai-advice-container"></div>
+        <div id="analysis-result-area"></div>
+        <div id="network-container"></div>
+        <div id="no-results">
+            <i class="fa-solid fa-box-open" style="font-size: 40px; margin-bottom: 15px;"></i>
+            <p>عفواً، لا توجد نتائج مطابقة لبحثك.</p>
+        </div>
+    </div>
+
+    <!-- ===== قسم خريطة المقر الرئيسي (ثابت) ===== -->
+    <div class="location-section" id="location-section">
+        <h2> <i class="fa-solid fa-map-location-dot"></i> موقعنا على الخريطة</h2>
+        <div class="location-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.495955148021!2d31.20786357555355!3d30.02262187493399!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145846e49123862b%3A0x12f5a6396017366d!2sEl%20Gamaa%20Tower!5e0!3m2!1sen!2seg" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        <p class="location-address">57 برج الجامعة، شارع مراد، الجيزة</p>
+    </div>
+</div>
+
+<script>
+    // === كل أكواد الجافاسكربت هنا مضبوطة للتعامل مع التصميم الجديد ===
+    document.addEventListener('DOMContentLoaded', function() {
+        const symptomsSearchBtn = document.getElementById('symptoms-search-btn');
+        const symptomsInput = document.getElementById('symptoms-input');
+        const locationInput = document.getElementById('location-input');
+        const loaderSymptoms = document.getElementById('loader-symptoms');
         const analyzeBtn = document.getElementById('analyze-reports-btn');
-        
-        // Scroll buttons
-        const scrollToTopBtn = document.getElementById('scrollToTop');
-        const scrollToDownBtn = document.getElementById('scrollToDown');
-
-        let uploadedFiles = [];
-
-        // --- Tab Functionality ---
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                tabs.forEach(item => item.classList.remove('active'));
-                panels.forEach(panel => panel.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById(tab.dataset.tab + '-panel').classList.add('active');
-            });
-        });
-
-        // --- Show Loader ---
-        const showLoader = () => {
-            resultsContainer.innerHTML = `
-                <div class="loader">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                    <p>جاري البحث والتحليل بالذكاء الاصطناعي...</p>
-                </div>`;
-            document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        // --- Render Error ---
-        const renderError = (message) => {
-            resultsContainer.innerHTML = `<div class="error-message"><strong>حدث خطأ:</strong> ${message}</div>`;
-        };
-
-        // --- Render Providers ---
-        const renderProviders = (providers) => {
-            if (!providers || providers.length === 0) {
-                resultsContainer.innerHTML = `
-                    <div class="info-message">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <p>عفواً، لم نتمكن من العثور على نتائج تطابق بحثك. حاول تعديل كلمات البحث.</p>
-                    </div>`;
-                return;
+        const analysisResultArea = document.getElementById('analysis-result-area');
+        const loaderAnalysis = document.getElementById('loader-analysis');
+        const resultsArea = document.getElementById('results-area');
+        const aiAdviceContainer = document.getElementById('ai-advice-container');
+        const networkContainer = document.getElementById('network-container');
+        const noResultsDiv = document.getElementById('no-results');
+        const specialtyIcons = { 'default': 'fa-solid fa-user-doctor', 'باطنة': 'fa-solid fa-stethoscope', 'علاج طبيعي': 'fa-solid fa-person-walking', 'اسنان': 'fa-solid fa-tooth', 'صيدلية': 'fa-solid fa-pills', 'قلب واوعية دموية': 'fa-solid fa-heart-pulse', 'مخ وأعصاب': 'fa-solid fa-brain', 'معمل': 'fa-solid fa-vial-virus', 'أشعة': 'fa-solid fa-x-ray', 'نساء وتوليد': 'fa-solid fa-person-pregnant', 'اطفال': 'fa-solid fa-child-reaching', 'عظام': 'fa-solid fa-bone', 'جلدية': 'fa-solid fa-hand-dots', 'انف واذن وحنجرة': 'fa-solid fa-head-side-cough', 'عيون': 'fa-solid fa-eye', 'صدرية': 'fa-solid fa-lungs', 'جراحة عامة': 'fa-solid fa-user-doctor', 'مسالك بولية': 'fa-solid fa-toilet-paper', 'مستشفى': 'fa-solid fa-hospital', 'مركز طبي': 'fa-solid fa-house-medical', 'بصريات': 'fa-solid fa-glasses' };
+        function getIconForSpecialty(specialty) { if (!specialty) return specialtyIcons['default']; const specialtyLower = specialty.toLowerCase(); for (const key in specialtyIcons) { if (specialtyLower.includes(key.toLowerCase())) return specialtyIcons[key]; } return specialtyIcons['default']; }
+        function renderResults(bestMatch, otherResults) {
+            networkContainer.innerHTML = ''; const allResults = (bestMatch || []).concat(otherResults || []);
+            noResultsDiv.style.display = allResults.length === 0 ? 'block' : 'none';
+            if (allResults.length > 0) {
+                const title = document.createElement('h2'); title.className = 'section-title'; title.textContent = `نتائج البحث (${allResults.length})`;
+                networkContainer.appendChild(title); const cardFragment = document.createDocumentFragment();
+                allResults.forEach((provider, index) => {
+                    const isBestMatch = index === 0 && bestMatch && bestMatch.length > 0;
+                    const card = document.createElement('div'); card.className = `provider-card ${isBestMatch ? 'best-match' : ''}`;
+                    const iconClass = getIconForSpecialty(provider.provider_type || provider.specialty_sub);
+                    let phonesHTML = provider.phones && provider.phones.length > 0 ? `<div class="phones-list">${provider.phones.map(p => `<span>${p}</span>`).join('')}</div>` : 'غير متوفر';
+                    let hotlineHTML = provider.hotline ? `<div class="phones-list"><span>${provider.hotline}</span></div>` : 'غير متوفر';
+                    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(provider.name + ', ' + provider.address)}`;
+                    card.innerHTML = `${isBestMatch ? '<div class="best-match-badge"><i class="fa-solid fa-star"></i> الترشيح الأنسب</div>' : ''}<div class="provider-header"><div class="provider-icon"><i class="${iconClass}"></i></div><div><div class="provider-name">${provider.name||'غير متوفر'}</div><div class="provider-specialty">${provider.provider_type||''} / ${provider.specialty_sub||''}</div></div></div><div class="provider-info-grid"><div class="provider-info-item"><i class="fa-solid fa-location-dot"></i><div>${provider.address||'غير متوفر'}</div></div><div class="provider-info-item"><i class="fa-solid fa-phone-volume"></i><div>${phonesHTML}</div></div><div class="provider-info-item"><i class="fa-solid fa-headset"></i><div>${hotlineHTML}</div></div></div><div class="provider-nav"><a href="${googleMapsUrl}" target="_blank" class="nav-btn map-btn" title="عرض على الخريطة (GPS)"><i class="fa-solid fa-diamond-turn-right"></i></a><button class="nav-btn nav-btn-up" title="العودة للبحث"><i class="fa-solid fa-arrow-up"></i></button><button class="nav-btn nav-btn-down" title="الذهاب لخريطة المقر الرئيسي"><i class="fa-solid fa-arrow-down"></i></button></div>`;
+                    cardFragment.appendChild(card);
+                }); networkContainer.appendChild(cardFragment);
             }
-
-            let recommendedProviderId = null;
-
-            resultsContainer.innerHTML = providers.map((provider, index) => {
-                const isRecommended = provider.is_recommended;
-                 if (isRecommended) {
-                     recommendedProviderId = `provider-${index}`;
-                 }
-
-                const phones = [provider.Telephone1, provider.Telephone2, provider.Telephone3, provider.Telephone4]
-                    .filter(p => p && String(p).trim() !== '')
-                    .map(p => `<a href="tel:${p}">${p}</a>`).join('');
-
-                const address = provider['عنوان مقدم الخدمة'] || 'غير متوفر';
-                const providerName = provider['اسم مقدم الخدمة'] || 'غير متوفر';
-                const mapQuery = encodeURIComponent(`${providerName}, ${address}`);
-                const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
-
-                // Determine icon based on specialty
-                let iconClass = 'fa-solid fa-user-doctor'; // Default icon
-                const specialty = (provider['التخصص الرئيسي'] || '').toLowerCase();
-                if (specialty.includes('اسنان') || specialty.includes('أسنان')) iconClass = 'fa-solid fa-tooth';
-                else if (specialty.includes('مستشفي') || specialty.includes('مستشفى')) iconClass = 'fa-solid fa-hospital';
-                else if (specialty.includes('معمل')) iconClass = 'fa-solid fa-flask-vial';
-                else if (specialty.includes('صيدلية')) iconClass = 'fa-solid fa-pills';
-                else if (specialty.includes('علاج طبيعي')) iconClass = 'fa-solid fa-person-running';
-                else if (specialty.includes('عيون') || specialty.includes('رمد')) iconClass = 'fa-solid fa-eye';
-                else if (specialty.includes('قلب')) iconClass = 'fa-solid fa-heart-pulse';
-                else if (specialty.includes('اطفال') || specialty.includes('أطفال')) iconClass = 'fa-solid fa-child-reaching';
-                else if (specialty.includes('عظام')) iconClass = 'fa-solid fa-bone';
-                else if (specialty.includes('جلدية') || specialty.includes('جلديه')) iconClass = 'fa-solid fa-allergies';
-                else if (specialty.includes('نساء') || specialty.includes('ولادة')) iconClass = 'fa-solid fa-person-pregnant';
-                else if (specialty.includes('نفسي')) iconClass = 'fa-solid fa-brain';
-                else if (specialty.includes('انف واذن') || specialty.includes('أنف وأذن')) iconClass = 'fa-solid fa-ear-listen';
-
-
-                return `
-                    <div class="provider-card ${isRecommended ? 'recommended' : ''}" id="provider-${index}">
-                        ${isRecommended ? `
-                            <div class="recommendation-badge">
-                                <i class="fa-solid fa-star"></i> الترشيح الأنسب لك
-                            </div>` : ''}
-                        <div class="provider-header">
-                            <div class="provider-icon"><i class="${iconClass}"></i></div>
-                            <div class="provider-title">
-                                <h2>${providerName}</h2>
-                                <p>${provider['التخصص الرئيسي'] || ''} - ${provider['التخصص الفرعي'] || ''}</p>
-                            </div>
-                        </div>
-                        <ul class="provider-details">
-                            <li>
-                                <i class="fa-solid fa-location-dot"></i>
-                                <div>
-                                    <span>${address}</span>
-                                    <a href="${mapUrl}" target="_blank" title="عرض على الخريطة"> (الانتقال للموقع <i class="fa-solid fa-map-location-dot"></i>)</a>
-                                </div>
-                            </li>
-                             ${phones ? `
-                            <li>
-                                <i class="fa-solid fa-phone"></i>
-                                <div class="phones-list">${phones}</div>
-                            </li>` : ''}
-                            ${provider.Hotline ? `
-                            <li>
-                                <i class="fa-solid fa-headset"></i>
-                                <div><strong>الخط الساخن:</strong> <a href="tel:${provider.Hotline}">${provider.Hotline}</a></div>
-                            </li>` : ''}
-                        </ul>
-                    </div>
-                `;
-            }).join('');
-            
-            if(recommendedProviderId) {
-                scrollToDownBtn.style.display = 'flex';
-                scrollToDownBtn.onclick = () => {
-                    document.getElementById(recommendedProviderId).scrollIntoView({ behavior: 'smooth' });
-                };
-            } else {
-                 scrollToDownBtn.style.display = 'none';
-            }
-        };
-
-        // --- Render Analysis and Providers ---
-        const renderAnalysis = (data) => {
-            const analysis = data.analysis;
-            const providers = data.providers;
-            
-            let analysisHTML = `
-                <div class="analysis-card">
-                    <div class="analysis-header"><i class="fa-solid fa-file-waveform"></i> تحليل التقارير الطبية</div>
-                    <div class="analysis-body">
-                        <h3><i class="fa-solid fa-microscope"></i> الشرح والتفسير</h3>
-                        <p>${analysis.interpretation.replace(/\n/g, '<br>')}</p>
-                        
-                        <h3><i class="fa-solid fa-lightbulb"></i> نصائح وإرشادات مؤقتة</h3>
-                        <ul>${analysis.temporary_advice.map(item => `<li>${item}</li>`).join('')}</ul>
-                        
-                        <h3><i class="fa-solid fa-stethoscope"></i> التخصص الموصى به</h3>
-                        <p><strong>${analysis.recommended_specialty}</strong></p>
-                        
-                        <div class="analysis-disclaimer">
-                            <i class="fa-solid fa-triangle-exclamation fa-2x"></i>
-                            <span><strong>تنبيه هام:</strong> هذا التحليل هو مجرد إرشاد أولي ولا يغني إطلاقًا عن استشارة الطبيب المختص.</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            resultsContainer.innerHTML = analysisHTML;
-            
-            if (providers && providers.length > 0) {
-                 resultsContainer.innerHTML += `<h2>مقدمي الخدمة المرشحين لك في تخصص "${analysis.recommended_specialty}"</h2>`;
-                 renderProviders(providers);
-            } else {
-                 resultsContainer.innerHTML += `
-                     <div class="info-message">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <p>لم نجد مقدمي خدمة في الشبكة للتخصص الموصى به حالياً.</p>
-                    </div>`;
-            }
-        };
-
-        // --- Search by Symptoms Logic ---
-        symptomSearchBtn.addEventListener('click', async () => {
-            const query = symptomQuery.value.trim();
-            symptomQuery.classList.remove('input-error');
-
-            if (!query) {
-                symptomQuery.classList.add('input-error');
-                setTimeout(() => {
-                    symptomQuery.classList.remove('input-error');
-                }, 820);
-                return;
-            }
-            showLoader();
-            scrollToDownBtn.style.display = 'none';
+        }
+        async function handleSymptomsSearch() {
+            const symptomsText = symptomsInput.value.trim(); const locationText = locationInput.value.trim();
+            if (!symptomsText || !locationText) { alert('من فضلك، قم بوصف الأعراض وتحديد موقعك.'); return; }
+            loaderSymptoms.style.display = 'block'; aiAdviceContainer.innerHTML = ''; analysisResultArea.innerHTML = ''; networkContainer.innerHTML = '';
+            noResultsDiv.style.display = 'none'; symptomsSearchBtn.disabled = true;
             try {
-                const response = await fetch(`${API_URL}/api/search-by-symptoms`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: query })
-                });
-                if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-                const data = await response.json();
-                renderProviders(data);
-            } catch (error) {
-                console.error('Error during symptom search:', error);
-                renderError('حدث خطأ أثناء الاتصال بالخادم. يرجى المحاولة مرة أخرى.');
-            }
-        });
-        
-        // --- Report Analysis Logic ---
-        analyzeBtn.addEventListener('click', async () => {
-             if (uploadedFiles.length === 0) return;
-             showLoader();
-             scrollToDownBtn.style.display = 'none';
-
-             const filePromises = uploadedFiles.map(file => {
-                 return new Promise((resolve, reject) => {
-                     const reader = new FileReader();
-                     reader.onload = () => resolve({
-                         name: file.name,
-                         mime_type: file.type,
-                         data: reader.result.split(',')[1] // Base64 data
-                     });
-                     reader.onerror = reject;
-                     reader.readAsDataURL(file);
-                 });
-             });
-
-             try {
-                 const filesPayload = await Promise.all(filePromises);
-                 const response = await fetch(`${API_URL}/api/analyze-and-recommend`, {
-                     method: 'POST',
-                     headers: { 'Content-Type': 'application/json' },
-                     body: JSON.stringify({ files: filesPayload })
-                 });
-
-                 if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
-                 const data = await response.json();
-                 renderAnalysis(data);
-
-             } catch (error) {
-                 console.error('Error during report analysis:', error);
-                 renderError('حدث خطأ أثناء تحليل التقارير. تأكد من أن الملفات سليمة وحاول مرة أخرى.');
-             }
-        });
-
-        // --- File Upload Area ---
-        uploadArea.addEventListener('click', () => fileInput.click());
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, e => {
-                e.preventDefault();
-                e.stopPropagation();
-            }, false);
-        });
-        ['dragenter', 'dragover'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-over'), false);
-        });
-        ['dragleave', 'drop'].forEach(eventName => {
-            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-over'), false);
-        });
-        uploadArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files), false);
-        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-        
-        function handleFiles(files) {
-            [...files].forEach(file => { if (uploadedFiles.length < 5) uploadedFiles.push(file) });
-            renderPreviews();
+                const response = await fetch('/api/symptoms-search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ symptoms: symptomsText, location: locationText }) });
+                if (!response.ok) { const err = await response.json(); throw new Error(err.error || 'فشل الاتصال بالخادم.'); }
+                const result = await response.json();
+                if (result.initial_advice) { aiAdviceContainer.innerHTML = `<div class="analysis-card" style="margin-bottom: 20px;"><h3 class="analysis-section-title">نصيحة طبية أولية</h3><p>${result.initial_advice}</p></div>`; }
+                renderResults(result.best_match, result.other_results);
+                resultsArea.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) { aiAdviceContainer.innerHTML = `<p style="color:var(--danger-red); text-align:center;">عفواً، حدث خطأ تقني: ${error.message}</p>`; } finally { loaderSymptoms.style.display = 'none'; symptomsSearchBtn.disabled = false; }
         }
-        
+        async function handleAIAnalysis() {
+            if (uploadedFiles.length === 0) { alert('يرجى اختيار ملف واحد على الأقل لتحليله.'); return; }
+            loaderAnalysis.style.display = 'block'; analysisResultArea.innerHTML = ''; aiAdviceContainer.innerHTML = ''; networkContainer.innerHTML = '';
+            noResultsDiv.style.display = 'none'; analyzeBtn.disabled = true;
+            try {
+                const filesPayload = await Promise.all(uploadedFiles.map(file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve({ mime_type: file.type, data: reader.result.split(',')[1] }); reader.onerror = error => reject(error); })));
+                const response = await fetch('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ files: filesPayload }) });
+                if (!response.ok) { const err = await response.json(); throw new Error(err.error || 'فشل الاتصال بالخادم.'); }
+                const result = await response.json();
+                analysisResultArea.innerHTML = `<div class="analysis-card"><div class="disclaimer"><i class="fa-solid fa-triangle-exclamation"></i> <strong>تنبيه هام:</strong> هذا التحليل إرشادي ولا يغني عن استشارة الطبيب.</div><h3 class="analysis-section-title">شرح مبدئي للتقرير</h3><p>${result.interpretation}</p><h3 class="analysis-section-title">نصائح وإرشادات مؤقتة</h3><ul>${result.temporary_advice.map(item=>`<li>${item}</li>`).join('')}</ul><h3 class="analysis-section-title">التخصص الموصى به</h3><p><strong>${result.recommended_specialty}</strong></p><div class="next-step-guidance"><i class="fa-solid fa-circle-info"></i> الخطوة التالية: استخدم أداة البحث بالأعراض أعلاه، اكتب "${result.recommended_specialty}" مع موقعك للعثور على أفضل مقدم خدمة لك.</div></div>`;
+                analysisResultArea.scrollIntoView({ behavior: 'smooth' });
+            } catch (error) { analysisResultArea.innerHTML = `<p style="color:var(--danger-red); text-align:center;">عفواً، حدث خطأ تقني: ${error.message}</p>`; } finally { loaderAnalysis.style.display = 'none'; analyzeBtn.disabled = uploadedFiles.length === 0; }
+        }
+        symptomsSearchBtn.addEventListener('click', handleSymptomsSearch); analyzeBtn.addEventListener('click', handleAIAnalysis);
+        document.body.addEventListener('click', function(event) { if (event.target.closest('.nav-btn-up')) { document.getElementById('search-box').scrollIntoView({ behavior: 'smooth', block: 'center' }); } if (event.target.closest('.nav-btn-down')) { document.getElementById('location-section').scrollIntoView({ behavior: 'smooth', block: 'center' }); } });
+        const uploadArea=document.getElementById('upload-area'); const fileInput=document.getElementById('report-files-input'); const previewContainer=document.getElementById('file-preview-container'); let uploadedFiles=[];
+        ['dragenter','dragover','dragleave','drop'].forEach(eventName=>uploadArea.addEventListener(eventName,e=>{e.preventDefault();e.stopPropagation();},false));
+        ['dragenter','dragover'].forEach(eventName=>uploadArea.addEventListener(eventName,()=>uploadArea.classList.add('drag-over'),false));
+        ['dragleave', 'drop'].forEach(eventName=>uploadArea.addEventListener(eventName,()=>uploadArea.classList.remove('drag-over'),false));
+        uploadArea.addEventListener('drop',e=>handleFiles(e.dataTransfer.files),false); fileInput.addEventListener('change',(e)=>handleFiles(e.target.files));
+        function handleFiles(files) { [...files].forEach(file=>{if(uploadedFiles.length<5)uploadedFiles.push(file)}); renderPreviews(); }
         function renderPreviews() {
-            previewContainer.innerHTML = '';
-            uploadedFiles.forEach((file, index) => {
-                const item = document.createElement('div');
-                item.className = 'preview-item';
-                let iconClass = 'fa-solid fa-file';
-                if (file.type.startsWith('image/')) iconClass = 'fa-solid fa-file-image';
-                else if (file.type.includes('pdf')) iconClass = 'fa-solid fa-file-pdf';
-                item.innerHTML = `
-                    <div class="file-icon"><i class="${iconClass}"></i><span>${file.name}</span></div>
-                    <button class="remove-file-btn" data-index="${index}">&times;</button>`;
-                previewContainer.appendChild(item);
-            });
-            analyzeBtn.disabled = uploadedFiles.length === 0;
-        }
-
-        previewContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('remove-file-btn')) {
-                uploadedFiles.splice(parseInt(e.target.dataset.index, 10), 1);
-                renderPreviews();
-            }
-        });
-
-        // --- Scroll-to-Top Button Logic ---
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                scrollToTopBtn.classList.add('visible');
-            } else {
-                scrollToTopBtn.classList.remove('visible');
-            }
-        });
-        scrollToTopBtn.addEventListener('click', () => {
-            document.getElementById('search-section').scrollIntoView({ behavior: 'smooth' });
-        });
+            previewContainer.innerHTML=''; uploadedFiles.forEach((file,index)=>{ const item=document.createElement('div'); item.className='preview-item'; let iconClass=file.type.startsWith('image/') ? 'fa-solid fa-file-image' : (file.type.includes('pdf') ? 'fa-solid fa-file-pdf' : 'fa-solid fa-file'); item.innerHTML=`<div class="file-icon"><i class="${iconClass}"></i><span>${file.name}</span></div><button class="remove-file-btn" data-index="${index}">&times;</button>`; previewContainer.appendChild(item); });
+            analyzeBtn.disabled=uploadedFiles.length===0;
+        } previewContainer.addEventListener('click',(e)=>{ if(e.target.classList.contains('remove-file-btn')){ uploadedFiles.splice(parseInt(e.target.dataset.index,10),1); renderPreviews(); } });
     });
-    </script>
+</script>
 </body>
 </html>
-
