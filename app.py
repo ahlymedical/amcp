@@ -25,7 +25,7 @@ def get_network_data():
         return NETWORK_DATA_CACHE
 
     basedir = os.path.abspath(os.path.dirname(__file__))
-    # <<< تعديل مهم: تم تصحيح المسار ليقرأ الملف من المجلد الرئيسي >>>
+    # <<< تم تصحيح المسار ليقرأ الملف من المجلد الرئيسي >>>
     excel_file_path = os.path.join(basedir, 'network_data.xlsx')
     
     app.logger.info(f"محاولة قراءة ملف الإكسل من المسار الصحيح: {excel_file_path}")
@@ -35,25 +35,35 @@ def get_network_data():
         return []
 
     try:
-        df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0)
+        # قراءة أول شيت في الملف بغض النظر عن اسمه
+        df = pd.read_excel(excel_file_path, sheet_name=0, header=0)
         
+        # التأكد من وجود أعمدة كافية قبل المتابعة
+        if len(df.columns) < 8: # على الأقل حتى عمود العنوان
+            raise ValueError("ملف الإكسل لا يحتوي على الأعمدة الكافية.")
+
         df.dropna(subset=[df.columns[0]], inplace=True)
         df = df.astype(str).replace('nan', '')
 
         data_list = []
         for _, row in df.iterrows():
-            # دمج كل أرقام الهواتف الموجودة في قائمة واحدة
+            # دمج كل أعمدة الهواتف الموجودة في قائمة واحدة
             phones = []
             # نفترض أن الهواتف تبدأ من العمود السادس (index 5) حتى ما قبل الأخير
-            for i in range(5, len(row) - 1): 
-                phone_val = str(row.iloc[i]).replace('.0', '').strip()
-                if phone_val and phone_val != '0':
-                    phones.append(phone_val)
+            # Telephone1 (F), Telephone2 (G), Telephone3 (H), Telephone4 (I)
+            for i in range(5, 9): 
+                if i < len(row):
+                    phone_val = str(row.iloc[i]).replace('.0', '').strip()
+                    if phone_val and phone_val != '0':
+                        phones.append(phone_val)
             
-            hotline = str(row.iloc[-1]).replace('.0', '').strip() or None # العمود الأخير دائمًا
-            if hotline == '0': hotline = None
+            hotline = None
+            # نفترض أن الهوتلاين هو العمود العاشر (index 9)
+            if len(row) > 9:
+                hotline_val = str(row.iloc[9]).replace('.0', '').strip()
+                if hotline_val and hotline_val != '0':
+                    hotline = hotline_val
             
-            # <<< تعديل مهم: تم تصحيح تعيين الأعمدة ليطابق طلبك >>>
             item = {
                 'governorate': row.iloc[1],      # المحافظات -> هي المنطقة (العمود B)
                 'provider_type': row.iloc[2],    # نوع مقدم الخدمة -> هو التخصص الرئيسي (العمود C)
@@ -88,7 +98,6 @@ def get_available_specialties():
     data = get_network_data()
     if not data: return '"باطنة", "عظام", "اسنان"'
     
-    # AI يعتمد على "نوع مقدم الخدمة" (التخصص الرئيسي)
     specialties = set(item.get('provider_type', '') for item in data)
     available_items = sorted(list(specialties))
     return ", ".join([f'"{item}"' for item in available_items if item])
@@ -96,13 +105,16 @@ def get_available_specialties():
 # --- باقي دوال الـ API تبقى كما هي تمامًا بدون تغيير ---
 @app.route("/api/recommend", methods=["POST"])
 def recommend_specialty():
-    # ... (الكود لم يتغير)
     try:
         data = request.get_json()
         symptoms = data.get('symptoms')
         if not symptoms: return jsonify({"error": "Missing symptoms"}), 400
+        
         api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key: return jsonify({"error": "Server configuration error."}), 500
+        if not api_key:
+            app.logger.error("خطأ فادح في recommend API: متغير البيئة GEMINI_API_KEY غير معين.")
+            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
+
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]. شكوى المريض: \"{symptoms}\"..."
@@ -115,13 +127,16 @@ def recommend_specialty():
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze_report():
-    # ... (الكود لم يتغير)
     try:
         data = request.get_json()
         files_data = data.get('files')
         if not files_data: return jsonify({"error": "Missing files"}), 400
+
         api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key: return jsonify({"error": "Server configuration error."}), 500
+        if not api_key:
+            app.logger.error("خطأ فادح في analyze API: متغير البيئة GEMINI_API_KEY غير معين.")
+            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
+
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         file_parts = [{"mime_type": f["mime_type"], "data": base64.b64decode(f["data"])} for f in files_data]
