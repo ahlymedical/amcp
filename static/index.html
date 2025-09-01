@@ -4,18 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>الشبكة الطبية - الأهلي للخدمات الطبية</title>
-<!-- Font Awesome Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-<!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <style>
-    /* === تم الإبقاء على كل أكواد التصميم الأصلية التي أرسلتها بدون أي تغيير === */
     :root {
-        --primary-green: #006A4E; --primary-orange: #F58220; --special-green-teal: #008080; --accent-light-green: #E6F0ED;
-        --white: #ffffff; --light-gray: #f0f2f5; --medium-gray: #e9ecef; --text-dark: #212529;
-        --text-muted: #6c757d; --danger-red: #dc3545; --primary-glow: rgba(0, 106, 78, 0.3); --star-yellow: #FFC107;
+        --primary-green: #006A4E; --primary-orange: #F58220; --accent-light-green: #E6F0ED;
+        --white: #ffffff; --light-gray: #f0f2f5; --medium-gray: #e9ecef;
+        --text-dark: #212529; --text-muted: #6c757d; --danger-red: #dc3545;
+        --primary-glow: rgba(0, 106, 78, 0.3); --star-yellow: #FFC107;
     }
     html { scroll-behavior: smooth; }
     body { font-family: 'Cairo', sans-serif; background-color: var(--light-gray); margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; color: var(--text-dark); line-height: 1.7; }
@@ -29,22 +27,19 @@
     .info-item { display: flex; align-items: center; gap: 15px; }
     .info-item i { font-size: 22px; color: var(--primary-orange); width: 25px; text-align: center; }
     .info-item-text a { color: var(--text-dark); text-decoration: none; font-weight: 600; }
-    .info-item-text a:hover { color: var(--primary-green); }
     .info-item-text .en { font-family: 'Poppins', sans-serif; font-size: 0.8em; color: var(--text-muted); display: block; }
     .feature-box { text-align: right; margin-bottom: 25px; padding: 20px; background-color: var(--accent-light-green); border: 1px solid var(--medium-gray); border-radius: 10px; }
     .feature-box h2 { font-size: 18px; color: var(--primary-green); margin-top: 0; margin-bottom: 5px; }
     .feature-box h2 .en-subtitle { font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 400; color: var(--text-muted); display: block; margin-top: 2px; }
     .feature-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
-    .filter-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; } /* Changed to 1 column for new layout */
-    .feature-box select, .feature-box textarea, .feature-box input[type="text"] { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Cairo', sans-serif; font-size: 14px; box-sizing: border-box; background-color: var(--white); margin-bottom: 10px; }
+    .filter-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px; }
+    .feature-box textarea, .feature-box input[type="text"] { width: 100%; padding: 12px 15px; border-radius: 8px; border: 1px solid #ccc; font-family: 'Cairo', sans-serif; font-size: 14px; box-sizing: border-box; background-color: var(--white); margin-bottom: 10px; }
     .feature-box button { background-color: var(--primary-green); color: var(--white); border: none; padding: 12px 25px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.3s; width: 100%; margin-top: 10px; }
     .feature-box button:hover:not(:disabled) { background-color: #005a41; }
     .feature-box button:disabled { background-color: #999; cursor: not-allowed; }
     .loader { border: 4px solid var(--medium-gray); border-top: 4px solid var(--primary-green); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .section-title { font-size: 22px; color: var(--primary-green); padding-bottom: 10px; margin-bottom: 20px; border-bottom: 3px solid var(--primary-orange); }
-    #intermediate-results-container { margin-top: 20px; display: none; }
-    /* --- التصميم الاحترافي لبطاقة النتائج كما طلبت --- */
     .provider-card { background-color: var(--white); border: 1px solid var(--medium-gray); border-radius: 12px; margin-bottom: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease; position: relative; overflow: hidden; }
     .provider-card.best-match { border: 2px solid var(--primary-green); box-shadow: 0 8px 25px var(--primary-glow); }
     .best-match-badge { position: absolute; top: 18px; left: -50px; background-color: var(--primary-green); color: white; padding: 5px 50px; font-size: 12px; font-weight: bold; transform: rotate(-45deg); display: flex; align-items: center; gap: 8px; }
@@ -90,21 +85,16 @@
             <div class="info-item"><i class="fa-solid fa-map-marker-alt"></i><div class="info-item-text"> 57 برج الجامعة، شارع مراد، الجيزة <span class="en">57 El Gamaa Tower, Mourad St, Giza</span> </div></div>
         </div>
     </div>
-
-    <!-- ===== Advanced Network Search (تم تعديل هذا الصندوق فقط) ===== -->
     <div class="feature-box" id="search-box">
         <h2> <i class="fa-solid fa-magnifying-glass"></i> البحث المتقدم في الشبكة الطبية <span class="en-subtitle">Advanced Network Search</span></h2>
         <p>صف الأعراض التي تشعر بها وحدد موقعك، وسيقوم المساعد الذكي بترشيح مقدم الخدمة الأنسب لك.</p>
         <div class="filter-grid">
-            <!-- تم حذف الفلاتر القديمة ووضع هذه العناصر بدلاً منها -->
             <textarea id="symptoms-input" rows="3" placeholder="اكتب الأعراض هنا... مثال: أشعر بألم شديد في الظهر مع صعوبة في الحركة"></textarea>
             <input type="text" id="location-input" placeholder="اكتب المنطقة أو المحافظة هنا... مثال: الطالبية هرم أو الجيزة">
         </div>
         <button id="symptoms-search-btn"><i class="fa-solid fa-robot"></i> ابحث الآن بالذكاء الاصطناعي</button>
         <div id="loader-symptoms" class="loader"></div>
     </div>
-
-    <!-- ===== AI Tools Section (هذا الصندوق لتحليل التقارير فقط الآن) ===== -->
     <div class="feature-box">
         <h2><i class="fa-solid fa-microscope"></i> تحليل التقارير الطبية <span class="en-subtitle">Analyze Medical Reports</span></h2>
         <p>ارفع تقاريرك أو التحاليل الطبية (صور أو PDF)، وسيقوم المساعد الذكي بتحليلها وتقديم شرح ونصائح أولية.</p>
@@ -119,8 +109,6 @@
         <button id="analyze-reports-btn" disabled><i class="fa-solid fa-file-medical"></i> حلل التقارير</button>
         <div id="loader-analysis" class="loader"></div>
     </div>
-
-    <!-- ===== Search Results Content (هذا القسم لم يتغير) ===== -->
     <div id="ai-advice-container"></div>
     <div id="analysis-result-area" class="ai-result-area"></div>
     <div id="network-container"></div>
@@ -128,8 +116,6 @@
         <i class="fa-solid fa-box-open" style="font-size: 40px; margin-bottom: 15px;"></i>
         <p>لا توجد نتائج مطابقة لبحثك. <br> <small>No results found matching your criteria.</small></p>
     </div>
-
-    <!-- ===== Map Section (هذا القسم لم يتغير) ===== -->
     <div class="location-section" id="location-section">
         <h2> <i class="fa-solid fa-map-location-dot"></i> موقعنا على الخريطة</h2>
         <div class="location-map">
@@ -139,7 +125,6 @@
     </div>
 </div>
 <script>
-    // === الكود البرمجي النهائي الذي يشغل كل شيء ===
     document.addEventListener('DOMContentLoaded', function() {
         const symptomsSearchBtn = document.getElementById('symptoms-search-btn');
         const symptomsInput = document.getElementById('symptoms-input');
