@@ -1,0 +1,7 @@
+Flask
+gunicorn
+flask-cors
+google-generativeai
+beautifulsoup4
+pandas
+lxml
