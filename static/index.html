@@ -1,394 +1,257 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>الشبكة الطبية - الأهلي للخدمات الطبية</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>الشبكة الطبية – البحث الذكي</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-:root{
-  --primary-green:#006A4E;--primary-orange:#F58220;--accent-light-green:#E6F0ED;
-  --white:#fff;--light-gray:#f0f2f5;--medium-gray:#e9ecef;
-  --text-dark:#212529;--text-muted:#6c757d;--danger-red:#dc3545;
-  --primary-glow:rgba(0,106,78,.3);--star-yellow:#FFC107;
-}
-html{scroll-behavior:smooth}
-body{font-family:'Cairo',sans-serif;background:var(--light-gray);margin:0;padding:0;display:flex;flex-direction:column;align-items:center;color:var(--text-dark);line-height:1.7}
-.logo-container-full-width{width:100%;background:var(--white);text-align:center;padding:20px 0;box-shadow:0 4px 8px rgba(0,0,0,.1)}
-.logo-image{max-width:900px;width:90%;height:auto}
-.page{background:var(--white);width:100%;max-width:900px;padding:25px;box-shadow:0 5px 30px rgba(0,0,0,.1);border-radius:15px;box-sizing:border-box;overflow:hidden;margin:20px 15px}
-.info-professional{background:var(--accent-light-green);border-radius:10px;padding:20px;margin-bottom:25px;text-align:right;border:1px solid var(--medium-gray)}
-.info-professional h1{font-size:20px;margin:0 0 5px;color:var(--primary-green)}
-.en-title{font-family:'Poppins',sans-serif;font-size:14px;color:var(--text-muted);margin-bottom:20px;display:block}
-.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px}
-.info-item{display:flex;align-items:center;gap:15px}
-.info-item i{font-size:22px;color:var(--primary-orange);width:25px;text-align:center}
-.info-item-text a{color:var(--text-dark);text-decoration:none;font-weight:600}
-.info-item-text .en{font-family:'Poppins',sans-serif;font-size:.8em;color:var(--text-muted);display:block}
+:root{--green:#006A4E;--orange:#F58220;--bg:#f3f5f7;--muted:#6c757d;--dark:#1f2937;--border:#e5e7eb;--star:#FFC107}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);font-family:'Cairo',sans-serif;color:var(--dark)}
+.container{max-width:980px;margin:18px auto;padding:0 14px}
+.header{background:#fff;border-radius:16px;padding:18px 16px;box-shadow:0 10px 30px rgba(0,0,0,.06);display:flex;align-items:center;gap:16px}
+.header img{width:220px;max-width:100%}
+.badge{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;padding:4px 12px;border-radius:999px;font-weight:700}
+.page{margin-top:16px;background:#fff;border-radius:16px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+.h2{font-size:20px;margin:0 0 8px;color:var(--green)}
+.sub{color:var(--muted);font-size:13px;margin-bottom:12px}
 
-.feature-box{text-align:right;margin-bottom:25px;padding:20px;background:var(--accent-light-green);border:1px solid var(--medium-gray);border-radius:10px}
-.feature-box h2{font-size:18px;color:var(--primary-green);margin:0 0 5px}
-.en-subtitle{font-family:'Poppins',sans-serif;font-size:13px;font-weight:400;color:var(--text-muted);display:block;margin-top:2px}
-.feature-box p{font-size:14px;color:var(--text-muted);margin-bottom:20px}
-.filter-grid{display:grid;grid-template-columns:1fr;gap:15px;margin-bottom:15px}
-.feature-box textarea,.feature-box input[type="text"]{width:100%;padding:12px 15px;border-radius:8px;border:1px solid #ccc;font-family:'Cairo',sans-serif;font-size:14px;background:#fff;box-sizing:border-box;margin-bottom:10px}
-.feature-box button{background:var(--primary-green);color:#fff;border:0;padding:12px 25px;font-size:16px;font-weight:700;border-radius:8px;cursor:pointer;transition:.3s;width:100%;margin-top:10px}
-.feature-box button:hover:not(:disabled){background:#005a41}
-.feature-box button:disabled{background:#999;cursor:not-allowed}
-.loader{border:4px solid var(--medium-gray);border-top:4px solid var(--primary-green);border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:10px auto;display:none}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-.loader-message{font-size:14px;color:var(--text-muted);text-align:center;display:none;margin-top:10px;font-weight:600}
+.input,textarea{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif}
+.btn{width:100%;padding:12px 14px;border:0;border-radius:10px;background:var(--green);color:#fff;font-weight:800;cursor:pointer;transition:.2s}
+.btn:hover{filter:brightness(.95)}
+.row{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:680px){.row{grid-template-columns:1fr 1fr}}
+.loader{width:32px;height:32px;border-radius:50%;border:4px solid var(--border);border-top-color:var(--green);animation:spin 1s linear infinite;margin:10px auto;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.helper{background:#fff3cd;border-right:4px solid #ffcd39;padding:12px;border-radius:12px;margin-top:10px;color:#7a5c00}
 
-.section-title{font-size:22px;color:var(--primary-green);padding-bottom:10px;margin-bottom:20px;border-bottom:3px solid var(--primary-orange)}
-.provider-card{background:#fff;border:1px solid var(--medium-gray);border-radius:12px;margin-bottom:15px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,.05);transition:.3s;position:relative;overflow:hidden}
-.provider-card.best-match{border:2px solid var(--primary-green);box-shadow:0 8px 25px var(--primary-glow)}
-.best-match-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid var(--medium-gray)}
-.best-match-badge{background:var(--primary-green);color:#fff;padding:3px 12px;font-size:14px;font-weight:bold;border-radius:20px;display:flex;align-items:center;gap:8px}
-.best-match-stars{color:var(--star-yellow);font-size:16px;letter-spacing:2px}
-.provider-header{display:flex;align-items:center;gap:15px;margin-bottom:15px}
-.provider-icon{width:50px;height:50px;background:var(--accent-light-green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--primary-green);flex-shrink:0}
-.provider-name{font-size:18px;font-weight:700;color:var(--text-dark)}
-.provider-specialty{font-size:14px;color:var(--text-muted)}
-.provider-info-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:15px;padding-top:15px;border-top:1px solid var(--medium-gray)}
-.provider-info-item{display:flex;align-items:flex-start;gap:12px;font-size:15px}
-.provider-info-item i{color:var(--primary-orange);width:20px;text-align:center;margin-top:3px;font-size:16px}
-.phones-list{display:flex;flex-wrap:wrap;gap:10px;font-family:'Poppins',sans-serif;font-weight:600}
-.phones-list span{background:var(--light-gray);padding:2px 8px;border-radius:5px}
-.provider-nav{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:15px;border-top:1px solid var(--medium-gray)}
-.nav-btn{background:var(--accent-light-green);border:1px solid var(--medium-gray);color:var(--primary-green);width:40px;height:40px;border-radius:50%;cursor:pointer;transition:.2s;font-size:16px;display:flex;align-items:center;justify-content:center;text-decoration:none}
-.nav-btn:hover{background:var(--primary-green);color:#fff;transform:scale(1.1)}
-.nav-btn.map-btn{background:var(--primary-orange);color:#fff}
-.nav-btn.map-btn:hover{background:#d9711c}
-#no-results{text-align:center;padding:40px 20px;background:var(--accent-light-green);border-radius:8px;color:var(--text-muted);font-weight:600;display:none}
+.card{border:1px solid var(--border);border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 2px 16px rgba(0,0,0,.04);position:relative}
+.card.best{border:2px solid var(--green);box-shadow:0 6px 22px rgba(0,106,78,.18)}
+.best-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed var(--border)}
+.best-badge{background:var(--green);color:#fff;padding:4px 10px;border-radius:999px;font-weight:800;display:inline-flex;align-items:center;gap:6px}
+.stars{color:var(--star)}
+.card-title{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.icon{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#eaf3f0;color:var(--green);font-size:20px}
+.meta{color:var(--muted);font-size:13px}
+.block{display:flex;gap:10px;margin-top:10px;align-items:flex-start}
+.block i{color:var(--orange)}
+.phones{display:flex;flex-wrap:wrap;gap:8px}
+.phones span{background:#f1f3f5;border-radius:8px;padding:2px 8px;font-family:'Poppins',sans-serif}
+.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.action{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#eef5f2;border:1px solid var(--border);color:var(--green);text-decoration:none}
+.action:hover{background:var(--green);color:#fff}
+.action.map{background:var(--orange);color:#fff;border-color:var(--orange)}
 
-.ai-result-area{margin-top:20px}
-.analysis-card{background:#fff;border:2px solid var(--primary-green);box-shadow:0 0 20px var(--primary-glow);border-radius:10px;padding:20px;text-align:right}
-.analysis-card .disclaimer{background:#fff3cd;border-right:5px solid #ffc107;padding:15px;border-radius:8px;margin-bottom:20px}
-.analysis-section-title{font-size:18px;font-weight:700;color:var(--primary-green);margin-top:20px;margin-bottom:10px;padding-bottom:5px;border-bottom:2px solid var(--primary-orange)}
-.analysis-card ul{padding-right:20px;margin:0}
-.analysis-card li{margin-bottom:10px;line-height:1.8}
-.next-step-guidance{margin-top:20px;padding:15px;background:var(--accent-light-green);border-radius:8px;text-align:center;font-weight:600}
+.section-title{font-weight:800;color:var(--green);border-bottom:3px solid var(--orange);padding-bottom:8px;margin-top:18px}
+.ai-card{border:2px solid var(--green);border-radius:14px;padding:16px;background:#fff;box-shadow:0 0 24px rgba(0,106,78,.18)}
+.ai-card h4{margin:10px 0;color:var(--green)}
+.ai-card ul{margin:6px 0 0 0;padding-right:18px}
+.ai-card li{margin:6px 0}
+.center{text-align:center}
+.footer-map{margin-top:24px}
+.footer-map iframe{width:100%;height:320px;border:0;border-radius:12px;box-shadow:0 8px 26px rgba(0,0,0,.08)}
+.small{font-size:12px;color:var(--muted)}
 
-.upload-area{border:2px dashed #ccc;border-radius:10px;padding:20px;margin-bottom:15px;transition:border-color .3s,background-color .3s}
-.upload-area.drag-over{border-color:var(--primary-green);background:var(--accent-light-green)}
-#report-files-input{display:none}
-.upload-label{display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);text-align:center}
-.upload-label i{font-size:36px;margin-bottom:10px;color:var(--primary-green)}
-#file-preview-container{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;justify-content:center}
-.preview-item{position:relative;width:80px;height:80px}
-.preview-item .file-icon{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;background:var(--light-gray);border-radius:8px;border:1px solid #ddd}
-.preview-item .file-icon i{font-size:30px;color:var(--primary-green)}
-.preview-item .file-icon span{font-size:10px;color:var(--text-muted);margin-top:5px;word-break:break-all;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;text-align:center}
-.remove-file-btn{position:absolute;top:-5px;right:-5px;width:20px;height:20px;background:var(--danger-red);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;z-index:1}
-
-.location-section{margin-top:40px;text-align:center}
-.location-section h2{font-size:20px;color:var(--primary-green);margin-bottom:15px}
-.location-map{position:relative;width:100%;height:300px;border-radius:10px;box-shadow:0 4px 15px rgba(0,0,0,.1);overflow:hidden}
-.location-map iframe{width:100%;height:100%;border:0}
-.location-address{margin-top:15px;font-size:16px;color:var(--text-muted);line-height:1.7}
+.hidden{display:none}
 </style>
 </head>
 <body>
-<div class="logo-container-full-width">
-  <img class="logo-image" src="https://i.ibb.co/JFMjRLSf/Cover-Linkedin-AMC-new.png" alt="AMC Logo" />
-</div>
-
-<div class="page" id="page-top">
-  <div class="info-professional">
-    <h1>دليل مقدمي الخدمة الطبية <span class="en-title">Medical Network Directory</span></h1>
-    <div class="info-grid">
-      <div class="info-item"><i class="fa-solid fa-phone"></i><div class="info-item-text">الخط الساخن: <strong>19462</strong> <span class="en">HOTLINE</span></div></div>
-      <div class="info-item"><i class="fa-solid fa-globe"></i><div class="info-item-text"><a target="_blank" href="https://www.ahlymedical.com/">www.ahlymedical.com</a> <span class="en">Our Website</span></div></div>
-      <div class="info-item"><i class="fa-solid fa-map-marker-alt"></i><div class="info-item-text">57 برج الجامعة، شارع مراد، الجيزة <span class="en">57 El Gamaa Tower, Mourad St, Giza</span></div></div>
-    </div>
+<div class="container">
+  <div class="header">
+    <img src="https://i.ibb.co/JFMjRLSf/Cover-Linkedin-AMC-new.png" alt="AMC">
+    <span class="badge"><i class="fa-solid fa-shield-heart"></i> الشبكة الطبية</span>
   </div>
 
-  <!-- الزر 1: البحث المتقدم بالأعراض + المكان -->
-  <div class="feature-box" id="search-box">
-    <h2><i class="fa-solid fa-magnifying-glass"></i> البحث المتقدم في الشبكة الطبية <span class="en-subtitle">Advanced Network Search</span></h2>
-    <p>اكتب الأعراض ومكانك (مثال: "أنا من الطالبية هرم وعندي صداع شديد") وسنرشح لك التخصص والعيادات الأنسب قربك.</p>
-    <div class="filter-grid">
-      <textarea id="symptoms-input" rows="3" placeholder="اكتب الأعراض هنا. مثال: أشعر بإرهاق شديد وصداع مستمر"></textarea>
-      <input id="location-input" type="text" placeholder="اكتب المنطقة أو المحافظة هنا. مثال: الطالبية هرم، الجيزة">
+  <!-- البحث الذكي بالأعراض + المكان -->
+  <div class="page" id="search">
+    <div class="h2"><i class="fa-solid fa-magnifying-glass"></i> البحث المتقدم في الشبكة الطبية</div>
+    <div class="sub">اكتب أعراضك ومكانك (مثال: “أنا من الطالبية هرم وعندي صداع شديد”).</div>
+    <div class="row">
+      <textarea id="symptoms" rows="3" class="input" placeholder="اكتب الأعراض هنا..."></textarea>
+      <input id="place" class="input" placeholder="اكتب المنطقة/المحافظة: مثال الطالبية هرم، الجيزة">
     </div>
-    <button id="symptoms-search-btn"><i class="fa-solid fa-robot"></i> ابحث الآن بالذكاء الاصطناعي</button>
-    <div id="loader-symptoms" class="loader"></div>
-    <div id="loader-message" class="loader-message">المرشد الطبي يحلل طلبك الآن…</div>
+    <button id="btn-symptoms" class="btn"><i class="fa-solid fa-robot"></i> ابحث الآن</button>
+    <div id="load-sym" class="loader"></div>
+    <div class="helper small">نؤكد أن النتائج إرشادية ولا تغني عن مراجعة الطبيب المختص.</div>
   </div>
 
-  <!-- الزر 2: تحليل التقارير -->
-  <div class="feature-box">
-    <h2><i class="fa-solid fa-microscope"></i> تحليل التقارير الطبية <span class="en-subtitle">Analyze Medical Reports</span></h2>
-    <p>ارفع تقاريرك أو تحاليلك (صور أو PDF) لتحصل على شرح طبي احترافي ونصائح أولية وترشيح التخصص والعيادات المناسبة.</p>
-    <div class="upload-area" id="upload-area">
-      <input id="report-files-input" type="file" multiple accept="image/png,image/jpeg,image/webp,application/pdf" />
-      <label class="upload-label" for="report-files-input">
-        <i class="fa-solid fa-cloud-arrow-up"></i>
-        <span>اختر ملفات التقارير أو اسحبها إلى هنا</span>
-      </label>
+  <!-- تحليل التقارير -->
+  <div class="page" id="reports">
+    <div class="h2"><i class="fa-solid fa-microscope"></i> تحليل التقارير/التحاليل الطبية</div>
+    <div class="sub">ارفع ملفاتك (صور أو PDF)، واكتب مكانك لنرشّح لك التخصص والمقدّم الأقرب.</div>
+
+    <div class="row">
+      <input id="rep-place" class="input" placeholder="مكانك (اختياري لكن مهم للترشيحات: مثال الجيزة)">
+      <input id="rep-files" type="file" multiple accept="image/*,application/pdf" class="input">
     </div>
-    <div id="file-preview-container"></div>
-    <button id="analyze-reports-btn" disabled><i class="fa-solid fa-file-medical"></i> حلّل التقارير</button>
-    <div id="loader-analysis" class="loader"></div>
+    <button id="btn-analyze" class="btn"><i class="fa-solid fa-file-medical"></i> حلّل التقارير</button>
+    <div id="load-ana" class="loader"></div>
   </div>
 
-  <div id="ai-advice-container"></div>
-  <div id="analysis-result-area" class="ai-result-area"></div>
+  <!-- مخرجات الذكاء الاصطناعي -->
+  <div id="ai-out" class="page hidden"></div>
 
-  <div id="network-container"></div>
-  <div id="no-results">
-    <i class="fa-solid fa-box-open" style="font-size:40px;margin-bottom:15px;"></i>
-    <p>لا توجد نتائج مطابقة لبحثك.<br><small>No results found.</small></p>
+  <!-- النتائج -->
+  <div id="results" class="page hidden">
+    <div class="section-title"><i class="fa-solid fa-list-check"></i> النتائج المقترحة</div>
+    <div id="cards"></div>
+    <div id="nores" class="center small hidden">لا توجد نتائج مطابقة لبحثك.</div>
   </div>
 
-  <div class="location-section" id="location-section">
-    <h2><i class="fa-solid fa-map-location-dot"></i> موقعنا على الخريطة</h2>
-    <div class="location-map">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.495955148021!2d31.20786357555355!3d30.02262187493399!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145846e49123862b%3A0x12f5a6396017366d!2sEl%20Gamaa%20Tower!5e0!3m2!1sen!2seg" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
-    </div>
-    <p class="location-address">57 برج الجامعة، شارع مراد، الجيزة</p>
+  <!-- خريطة المقر -->
+  <div class="page footer-map" id="hq">
+    <div class="h2"><i class="fa-solid fa-map-location-dot"></i> المقر الرئيسي</div>
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.495955148021!2d31.20786357555355!3d30.02262187493399!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145846e49123862b%3A0x12f5a6396017366d!2sEl%20Gamaa%20Tower!5e0!3m2!1sen!2seg" loading="lazy"></iframe>
   </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const symptomsBtn = document.getElementById('symptoms-search-btn');
-  const symptomsInput = document.getElementById('symptoms-input');
-  const locationInput = document.getElementById('location-input');
-  const loaderSymptoms = document.getElementById('loader-symptoms');
-  const loaderMessage = document.getElementById('loader-message');
+const iconMap = {
+  "default":"fa-user-doctor","باطنه":"fa-stethoscope","باطنة":"fa-stethoscope","جراحه":"fa-user-doctor","جراحة":"fa-user-doctor",
+  "قلب":"fa-heart-pulse","مخ":"fa-brain","اعصاب":"fa-brain","نساء":"fa-person-pregnant","حمل":"fa-person-pregnant",
+  "اطفال":"fa-child-reaching","عيون":"fa-eye","جلديه":"fa-hand-dots","جلدية":"fa-hand-dots","عظام":"fa-bone",
+  "انف":"fa-head-side-cough","اذن":"fa-head-side-cough","حنجره":"fa-head-side-cough","صدر":"fa-lungs",
+  "مسالك":"fa-toilet-paper","اسنان":"fa-tooth","صيدليه":"fa-pills","صيدلية":"fa-pills",
+  "اشعه":"fa-x-ray","أشعة":"fa-x-ray","معمل":"fa-vial-virus","مستشفى":"fa-hospital","مركز طبي":"fa-house-medical"
+};
+function getIcon(s=""){ s = (s||"").toLowerCase(); for(const k in iconMap){ if(s.includes(k)) return "fa-solid "+iconMap[k]; } return "fa-solid "+iconMap["default"]; }
 
-  const analyzeBtn = document.getElementById('analyze-reports-btn');
-  const analysisArea = document.getElementById('analysis-result-area');
-  const loaderAnalysis = document.getElementById('loader-analysis');
-  const aiAdviceContainer = document.getElementById('ai-advice-container');
+const btnSymptoms = document.getElementById('btn-symptoms');
+const symptomsEl = document.getElementById('symptoms');
+const placeEl = document.getElementById('place');
+const loadSym = document.getElementById('load-sym');
 
-  const networkContainer = document.getElementById('network-container');
-  const noResultsDiv = document.getElementById('no-results');
+const btnAnalyze = document.getElementById('btn-analyze');
+const repPlaceEl = document.getElementById('rep-place');
+const repFilesEl = document.getElementById('rep-files');
+const loadAna = document.getElementById('load-ana');
 
-  // خريطة أيقونات للتخصصات
-  const specialtyIcons = {
-    'default':'fa-solid fa-user-doctor','باطنة':'fa-solid fa-stethoscope','علاج طبيعي':'fa-solid fa-person-walking',
-    'اسنان':'fa-solid fa-tooth','صيدلية':'fa-solid fa-pills','قلب واوعية دموية':'fa-solid fa-heart-pulse',
-    'مخ وأعصاب':'fa-solid fa-brain','معمل':'fa-solid fa-vial-virus','أشعة':'fa-solid fa-x-ray',
-    'نساء وتوليد':'fa-solid fa-person-pregnant','اطفال':'fa-solid fa-child-reaching','عظام':'fa-solid fa-bone',
-    'جلدية':'fa-solid fa-hand-dots','انف واذن وحنجرة':'fa-solid fa-head-side-cough','عيون':'fa-solid fa-eye',
-    'صدرية':'fa-solid fa-lungs','جراحة عامة':'fa-solid fa-user-doctor','مسالك بولية':'fa-solid fa-toilet-paper',
-    'مستشفى':'fa-solid fa-hospital','مركز طبي':'fa-solid fa-house-medical','بصريات':'fa-solid fa-glasses'
-  };
-  const getIcon = s => {
-    if(!s) return specialtyIcons['default'];
-    const l = s.toLowerCase();
-    for(const k in specialtyIcons){ if(l.includes(k.toLowerCase())) return specialtyIcons[k]; }
-    return specialtyIcons['default'];
-  };
+const aiOut = document.getElementById('ai-out');
+const results = document.getElementById('results');
+const cards = document.getElementById('cards');
+const nores = document.getElementById('nores');
 
-  async function handleSymptomsSearch(){
-    const symptoms = symptomsInput.value.trim();
-    const location = locationInput.value.trim();
-    if(!symptoms || !location){
-      alert('برجاء كتابة الأعراض والمكان.');
-      return;
-    }
-    networkContainer.innerHTML = '';
-    aiAdviceContainer.innerHTML = '';
-    noResultsDiv.style.display = 'none';
-    loaderSymptoms.style.display = 'block';
-    loaderMessage.style.display = 'block';
+function showAIBlock({explanation, tips, spec, resolvedLoc}) {
+  const tipsHtml = (tips||[]).map(t=>`<li>${t}</li>`).join('');
+  aiOut.classList.remove('hidden');
+  aiOut.innerHTML = `
+    <div class="ai-card">
+      <div class="helper"><strong>تنبيه مهم:</strong> هذه معلومات إرشادية ولا تغني عن زيارة الطبيب.</div>
+      ${explanation?`<h4>الشرح الطبي</h4><p>${explanation}</p>`:''}
+      ${tipsHtml?`<h4>نصائح أولية</h4><ul>${tipsHtml}</ul>`:''}
+      ${spec?`<h4>التخصص الأنسب</h4><p><strong>${spec}</strong>${resolvedLoc?` — بالقرب من: <strong>${resolvedLoc}</strong>`:''}</p>`:''}
+    </div>
+  `;
+  aiOut.scrollIntoView({behavior:"smooth",block:"start"});
+}
 
-    try{
-      const res = await fetch('/api/symptoms-search',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({symptoms, location})
-      });
-      const data = await res.json();
-      loaderSymptoms.style.display = 'none';
-      loaderMessage.style.display = 'none';
+function renderProviders(list) {
+  results.classList.remove('hidden');
+  cards.innerHTML = '';
+  nores.classList.add('hidden');
+  if(!list || !list.length){ nores.classList.remove('hidden'); return; }
 
-      // كارت الشرح الطبي والنصائح
-      const adviceHTML = `
-        <div class="analysis-card">
-          <div class="disclaimer">
-            <strong>تنبيه مهم:</strong> هذا الشرح مبدئي ولا يغني عن مراجعة الطبيب المختص.
-          </div>
-          ${data.doctor_explanation ? `<div class="analysis-section-title">الشرح الطبي</div><p>${data.doctor_explanation}</p>`:''}
-          ${Array.isArray(data.temporary_advice) && data.temporary_advice.length ? `
-            <div class="analysis-section-title">نصائح أولية</div>
-            <ul>${data.temporary_advice.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
-          ${data.recommended_specialty ? `<div class="next-step-guidance">التخصص الأنسب لحالتك: <strong>${data.recommended_specialty}</strong></div>`:''}
-        </div>`;
-      aiAdviceContainer.innerHTML = adviceHTML;
-
-      // تحويل القائمة إلى عناصر (بدون اتصال خارجي – سيُملأ من الواجهة عادة)
-      const bestIdx = Array.isArray(data.best_match_indices) ? data.best_match_indices : [];
-      const otherIdx = Array.isArray(data.other_indices) ? data.other_indices : [];
-
-      // الواجهة ستستبدل هذه الدالة بتمرير النتائج الفعلية (عبر JS آخر يدمج الشبكة في الواجهة)
-      renderResults(bestIdx, otherIdx);
-
-      aiAdviceContainer.scrollIntoView({behavior:'smooth', block:'start'});
-
-    }catch(err){
-      loaderSymptoms.style.display = 'none';
-      loaderMessage.style.display = 'none';
-      alert('حدث خطأ أثناء البحث الذكي.');
-      console.error(err);
-    }
-  }
-
-  // تُنشئ بطاقات مزوّرة للعرض إن لم تُدمج البيانات من الباك-إند مباشرة
-  function renderResults(bestIndices, otherIndices){
-    // ملاحظة: في نسخة الدمج الكاملة ستُستبدل هذه الدالة ببناء النتائج من بيانات الشبكة الحقيقية المرسلة من السيرفر
-    // لإظهار الشكل النهائي فقط سنعرض صناديق توضيحية:
-    const buildCard = (i, best=false) => `
-      <div class="provider-card ${best?'best-match':''}">
-        ${best ? `
-          <div class="best-match-header">
-            <div class="best-match-badge"><i class="fa-solid fa-thumbs-up"></i> الترشيح الأنسب</div>
-            <div class="best-match-stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-          </div>` : ''}
-
-        <div class="provider-header">
-          <div class="provider-icon"><i class="${getIcon('باطنة')}"></i></div>
+  list.forEach(p=>{
+    const icon = getIcon((p.specialty_sub||p.provider_type||""));
+    const phones = (p.phones||[]).map(x=>`<span>${x}</span>`).join('');
+    cards.insertAdjacentHTML('beforeend', `
+      <div class="card ${p.best?'best':''}">
+        ${p.best?`
+          <div class="best-head">
+            <span class="best-badge"><i class="fa-solid fa-thumbs-up"></i> الترشيح الأنسب</span>
+            <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+          </div>`:''}
+        <div class="card-title">
+          <div class="icon"><i class="${icon}"></i></div>
           <div>
-            <div class="provider-name">اسم مقدم الخدمة (مثال)</div>
-            <div class="provider-specialty">التخصص: باطنة – التخصص الفرعي: سكر وغدد</div>
+            <div style="font-weight:800">${p.name||'مقدم خدمة'}</div>
+            <div class="meta">التخصص: ${p.specialty_sub||p.provider_type||'-'} — النوع: ${p.provider_type||'-'}</div>
           </div>
         </div>
-
-        <div class="provider-info-grid">
-          <div class="provider-info-item">
-            <i class="fa-solid fa-location-dot"></i>
-            <div>العنوان: الجيزة – الطالبية هرم – شارع مثال ١٢٣</div>
-          </div>
-          <div class="provider-info-item">
-            <i class="fa-solid fa-phone"></i>
-            <div class="phones-list">
-              <span>01000000000</span><span>01111111111</span><span>01222222222</span><span>0233333333</span>
-            </div>
-          </div>
-          <div class="provider-info-item">
-            <i class="fa-solid fa-fire-extinguisher"></i>
-            <div>Hotline: <strong>19XXX</strong></div>
-          </div>
+        <div class="block"><i class="fa-solid fa-location-dot"></i><div>العنوان: ${p.address||'-'} <span class="meta">(${p.governorate||'-'})</span></div></div>
+        <div class="block"><i class="fa-solid fa-phone"></i><div class="phones">${phones||'<span>-</span>'}</div></div>
+        ${p.hotline?`<div class="block"><i class="fa-solid fa-fire-extinguisher"></i><div>Hotline: <strong>${p.hotline}</strong></div></div>`:''}
+        <div class="actions">
+          <a href="#search" class="action" title="الرجوع للبحث"><i class="fa-solid fa-arrow-up"></i></a>
+          <a href="${p.maps_url}" class="action map" target="_blank" title="افتح العنوان على الخرائط"><i class="fa-solid fa-location-arrow"></i></a>
+          <a href="#hq" class="action" title="الذهاب لخريطة المقر"><i class="fa-solid fa-arrow-down"></i></a>
         </div>
-
-        <div class="provider-nav">
-          <a class="nav-btn nav-btn-up" title="الرجوع لمربع البحث"><i class="fa-solid fa-arrow-up"></i></a>
-          <a class="nav-btn map-btn" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('الجيزة الطالبية هرم شارع مثال 123')}" target="_blank" title="انتقال للعنوان على الخرائط"><i class="fa-solid fa-location-arrow"></i></a>
-          <a class="nav-btn nav-btn-down" title="الانتقال لأسفل (الخريطة)"><i class="fa-solid fa-arrow-down"></i></a>
-        </div>
-      </div>`;
-
-    if(bestIndices.length===0 && otherIndices.length===0){
-      networkContainer.innerHTML = '';
-      noResultsDiv.style.display = 'block';
-      return;
-    }
-    noResultsDiv.style.display = 'none';
-    networkContainer.innerHTML = `
-      <h2 class="section-title"><i class="fa-solid fa-list-check"></i> النتائج المقترحة</h2>
-      ${bestIndices.map(i=>buildCard(i,true)).join('')}
-      ${otherIndices.map(i=>buildCard(i,false)).join('')}
-    `;
-  }
-
-  // تحليل التقارير
-  const uploadArea = document.getElementById('upload-area');
-  const fileInput = document.getElementById('report-files-input');
-  const previewContainer = document.getElementById('file-preview-container');
-  let uploadedFiles = [];
-
-  ['dragenter','dragover','dragleave','drop'].forEach(ev=>{
-    uploadArea.addEventListener(ev, e=>{e.preventDefault();e.stopPropagation();});
+      </div>
+    `);
   });
-  ['dragenter','dragover'].forEach(ev=>{
-    uploadArea.addEventListener(ev, ()=>uploadArea.classList.add('drag-over'));
-  });
-  ['dragleave','drop'].forEach(ev=>{
-    uploadArea.addEventListener(ev, ()=>uploadArea.classList.remove('drag-over'));
-  });
-  uploadArea.addEventListener('drop', e=>handleFiles(e.dataTransfer.files));
-  fileInput.addEventListener('change', e=>handleFiles(e.target.files));
+  results.scrollIntoView({behavior:"smooth",block:"start"});
+}
 
-  function handleFiles(files){
-    [...files].forEach(f=>{ if(uploadedFiles.length<5) uploadedFiles.push(f); });
-    renderPreviews();
-  }
-  function renderPreviews(){
-    previewContainer.innerHTML='';
-    uploadedFiles.forEach((file,idx)=>{
-      const icon = file.type.startsWith('image/') ? 'fa-solid fa-file-image'
-                 : (file.type.includes('pdf') ? 'fa-solid fa-file-pdf' : 'fa-solid fa-file');
-      const el = document.createElement('div');
-      el.className='preview-item';
-      el.innerHTML = `
-        <div class="file-icon"><i class="${icon}"></i><span>${file.name}</span></div>
-        <button class="remove-file-btn" data-idx="${idx}">&times;</button>`;
-      previewContainer.appendChild(el);
+async function doSymptomsSearch(){
+  const symptoms = (symptomsEl.value||'').trim();
+  const location = (placeEl.value||'').trim();
+  if(!symptoms || !location){ alert('اكتب الأعراض والمكان من فضلك.'); return; }
+  aiOut.classList.add('hidden'); results.classList.add('hidden'); cards.innerHTML=''; nores.classList.add('hidden');
+  loadSym.style.display = 'block';
+  try{
+    const r = await fetch('/api/symptoms-search', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ symptoms, location })
     });
-    analyzeBtn.disabled = uploadedFiles.length===0;
+    const data = await r.json();
+    loadSym.style.display = 'none';
+    if(data.error){ alert(data.error); return; }
+
+    showAIBlock({
+      explanation: data.doctor_explanation,
+      tips: data.temporary_advice,
+      spec: data.recommended_specialty,
+      resolvedLoc: data.resolved_location
+    });
+    renderProviders(data.providers);
+  }catch(e){
+    loadSym.style.display = 'none';
+    alert('حدث خطأ أثناء البحث.');
+    console.error(e);
   }
-  previewContainer.addEventListener('click', e=>{
-    if(e.target.classList.contains('remove-file-btn')){
-      uploadedFiles.splice(parseInt(e.target.dataset.idx,10),1);
-      renderPreviews();
-    }
-  });
+}
 
-  async function handleAIAnalysis(){
-    if(uploadedFiles.length===0) return;
-    analysisArea.innerHTML = '';
-    loaderAnalysis.style.display = 'block';
-    try{
-      const filesPayload = await Promise.all(uploadedFiles.map(async f=>{
-        const buf = await f.arrayBuffer();
-        const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-        return { mime_type: f.type || 'application/octet-stream', data: b64 };
-      }));
-      const res = await fetch('/api/analyze',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ files: filesPayload })
-      });
-      const out = await res.json();
-      loaderAnalysis.style.display = 'none';
+async function doAnalyze(){
+  const files = Array.from(repFilesEl.files||[]);
+  if(!files.length){ alert('اختر ملفات للتقييم.'); return; }
+  loadAna.style.display = 'block';
+  aiOut.classList.add('hidden'); results.classList.add('hidden'); cards.innerHTML=''; nores.classList.add('hidden');
 
-      const html = `
-        <div class="analysis-card">
-          <div class="disclaimer"><strong>تنبيه:</strong> التحليل إرشادي ولا يغني عن زيارة الطبيب.</div>
-          ${out.interpretation?`<div class="analysis-section-title">شرح التقرير</div><p>${out.interpretation}</p>`:''}
-          ${Array.isArray(out.temporary_advice)&&out.temporary_advice.length?`
-            <div class="analysis-section-title">نصائح مؤقتة</div>
-            <ul>${out.temporary_advice.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
-          ${out.recommended_specialty?`<div class="next-step-guidance">التخصص المقترح: <strong>${out.recommended_specialty}</strong></div>`:''}
-        </div>`;
-      analysisArea.innerHTML = html;
-      analysisArea.scrollIntoView({behavior:'smooth', block:'start'});
-    }catch(e){
-      loaderAnalysis.style.display = 'none';
-      alert('تعذر تحليل التقارير الآن.');
-      console.error(e);
-    }
+  try{
+    const filesPayload = await Promise.all(files.map(async f=>{
+      const buf = await f.arrayBuffer();
+      const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      return { mime_type: f.type||'application/octet-stream', data: b64 };
+    }));
+    const r = await fetch('/api/analyze', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ files: filesPayload, location: (repPlaceEl.value||'').trim() })
+    });
+    const data = await r.json();
+    loadAna.style.display = 'none';
+    if(data.error){ alert(data.error); return; }
+
+    showAIBlock({
+      explanation: data.interpretation,
+      tips: data.temporary_advice,
+      spec: data.recommended_specialty,
+      resolvedLoc: data.resolved_location
+    });
+    renderProviders(data.providers);
+  }catch(e){
+    loadAna.style.display = 'none';
+    alert('تعذر تحليل التقارير حالياً.');
+    console.error(e);
   }
+}
 
-  symptomsBtn.addEventListener('click', handleSymptomsSearch);
-  analyzeBtn.addEventListener('click', handleAIAnalysis);
-
-  // أسهم تنقل
-  document.body.addEventListener('click', e=>{
-    if(e.target.closest('.nav-btn-up')){
-      document.getElementById('search-box').scrollIntoView({behavior:'smooth', block:'center'});
-    }
-    if(e.target.closest('.nav-btn-down')){
-      document.getElementById('location-section').scrollIntoView({behavior:'smooth', block:'center'});
-    }
-  });
-});
+btnSymptoms.addEventListener('click', doSymptomsSearch);
+btnAnalyze.addEventListener('click', doAnalyze);
 </script>
 </body>
 </html>
