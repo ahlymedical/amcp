@@ -1,257 +1,223 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>الشبكة الطبية – البحث الذكي</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<title>الشبكة الطبية — الأهلي للخدمات الطبية</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
 <style>
-:root{--green:#006A4E;--orange:#F58220;--bg:#f3f5f7;--muted:#6c757d;--dark:#1f2937;--border:#e5e7eb;--star:#FFC107}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);font-family:'Cairo',sans-serif;color:var(--dark)}
-.container{max-width:980px;margin:18px auto;padding:0 14px}
-.header{background:#fff;border-radius:16px;padding:18px 16px;box-shadow:0 10px 30px rgba(0,0,0,.06);display:flex;align-items:center;gap:16px}
-.header img{width:220px;max-width:100%}
-.badge{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;padding:4px 12px;border-radius:999px;font-weight:700}
-.page{margin-top:16px;background:#fff;border-radius:16px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
-.h2{font-size:20px;margin:0 0 8px;color:var(--green)}
-.sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+  body{font-family:Tahoma, Arial, sans-serif;background:#f7f7f7;margin:0}
+  .container{max-width:980px;margin:auto;padding:16px}
+  .section{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:16px;margin:12px 0}
+  h2{margin:6px 0 12px}
+  textarea,input[type="text"]{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px}
+  button{width:100%;background:#006a4e;color:#fff;border:0;border-radius:10px;padding:12px;cursor:pointer;font-weight:bold}
+  button:hover{opacity:.95}
+  .muted{color:#666;font-size:13px}
+  .loader{display:none;border:4px solid #eee;border-top:4px solid #006a4e;border-radius:50%;width:28px;height:28px;animation:spin 1s linear infinite;margin:10px auto}
+  @keyframes spin{100%{transform:rotate(360deg)}}
 
-.input,textarea{width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-family:'Cairo',sans-serif}
-.btn{width:100%;padding:12px 14px;border:0;border-radius:10px;background:var(--green);color:#fff;font-weight:800;cursor:pointer;transition:.2s}
-.btn:hover{filter:brightness(.95)}
-.row{display:grid;grid-template-columns:1fr;gap:10px}
-@media (min-width:680px){.row{grid-template-columns:1fr 1fr}}
-.loader{width:32px;height:32px;border-radius:50%;border:4px solid var(--border);border-top-color:var(--green);animation:spin 1s linear infinite;margin:10px auto;display:none}
-@keyframes spin{to{transform:rotate(360deg)}}
-.helper{background:#fff3cd;border-right:4px solid #ffcd39;padding:12px;border-radius:12px;margin-top:10px;color:#7a5c00}
-
-.card{border:1px solid var(--border);border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 2px 16px rgba(0,0,0,.04);position:relative}
-.card.best{border:2px solid var(--green);box-shadow:0 6px 22px rgba(0,106,78,.18)}
-.best-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed var(--border)}
-.best-badge{background:var(--green);color:#fff;padding:4px 10px;border-radius:999px;font-weight:800;display:inline-flex;align-items:center;gap:6px}
-.stars{color:var(--star)}
-.card-title{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.icon{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#eaf3f0;color:var(--green);font-size:20px}
-.meta{color:var(--muted);font-size:13px}
-.block{display:flex;gap:10px;margin-top:10px;align-items:flex-start}
-.block i{color:var(--orange)}
-.phones{display:flex;flex-wrap:wrap;gap:8px}
-.phones span{background:#f1f3f5;border-radius:8px;padding:2px 8px;font-family:'Poppins',sans-serif}
-.actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-.action{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#eef5f2;border:1px solid var(--border);color:var(--green);text-decoration:none}
-.action:hover{background:var(--green);color:#fff}
-.action.map{background:var(--orange);color:#fff;border-color:var(--orange)}
-
-.section-title{font-weight:800;color:var(--green);border-bottom:3px solid var(--orange);padding-bottom:8px;margin-top:18px}
-.ai-card{border:2px solid var(--green);border-radius:14px;padding:16px;background:#fff;box-shadow:0 0 24px rgba(0,106,78,.18)}
-.ai-card h4{margin:10px 0;color:var(--green)}
-.ai-card ul{margin:6px 0 0 0;padding-right:18px}
-.ai-card li{margin:6px 0}
-.center{text-align:center}
-.footer-map{margin-top:24px}
-.footer-map iframe{width:100%;height:320px;border:0;border-radius:12px;box-shadow:0 8px 26px rgba(0,0,0,.08)}
-.small{font-size:12px;color:var(--muted)}
-
-.hidden{display:none}
+  .card{border:1px solid #e7e7e7;border-radius:12px;padding:12px;margin:10px 0;background:#fff}
+  .card.best{border:2px solid #006a4e;box-shadow:0 0 0 4px rgba(0,106,78,.08)}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:#006a4e;color:#fff;border-radius:999px;padding:4px 10px;font-size:12px;margin-bottom:8px}
+  .stars{color:#ffc107}
+  .row{display:flex;gap:10px;align-items:flex-start}
+  .icon{width:44px;height:44px;border-radius:50%;background:#e7f1ed;display:inline-flex;align-items:center;justify-content:center;color:#006a4e;font-size:20px}
+  .title{font-weight:bold}
+  .small{font-size:12px;color:#666}
+  .pill{display:inline-block;background:#f3f5f7;border-radius:999px;padding:2px 8px;margin:2px 4px}
+  .actions a{display:inline-block;margin:4px;padding:10px;border-radius:10px;background:#f1f1f1;color:#006a4e;text-decoration:none}
+  .actions a:hover{background:#006a4e;color:#fff}
+  .map-wrap{position:relative;border-radius:12px;overflow:hidden}
+  .map-wrap::after{content:"اضغط لفتح الموقع في الخرائط";position:absolute;bottom:6px;right:6px;background:rgba(0,106,78,.85);color:#fff;padding:4px 8px;border-radius:6px;font-size:12px}
+  .divider{height:1px;background:#eee;margin:12px 0}
+  .hint{background:#fff9e6;border:1px solid #ffe08a;color:#7a5d00;padding:8px;border-radius:8px;font-size:13px}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <img src="https://i.ibb.co/JFMjRLSf/Cover-Linkedin-AMC-new.png" alt="AMC">
-    <span class="badge"><i class="fa-solid fa-shield-heart"></i> الشبكة الطبية</span>
-  </div>
 
-  <!-- البحث الذكي بالأعراض + المكان -->
-  <div class="page" id="search">
-    <div class="h2"><i class="fa-solid fa-magnifying-glass"></i> البحث المتقدم في الشبكة الطبية</div>
-    <div class="sub">اكتب أعراضك ومكانك (مثال: “أنا من الطالبية هرم وعندي صداع شديد”).</div>
-    <div class="row">
-      <textarea id="symptoms" rows="3" class="input" placeholder="اكتب الأعراض هنا..."></textarea>
-      <input id="place" class="input" placeholder="اكتب المنطقة/المحافظة: مثال الطالبية هرم، الجيزة">
-    </div>
-    <button id="btn-symptoms" class="btn"><i class="fa-solid fa-robot"></i> ابحث الآن</button>
+<div class="container">
+
+  <!-- البحث بالأعراض -->
+  <div class="section" id="search">
+    <h2>🔎 البحث المتقدم في الشبكة الطبية</h2>
+    <div class="muted">اكتب حاسس بإيه (بالعامية/العربي/الإنجليزي) وقولنا انت فين — هنرشّح لك التخصص والعيادات القريبة.</div>
+    <div style="margin-top:10px"></div>
+    <textarea id="symptoms" rows="3" placeholder="مثال: تعبان أوي ومصدع / severe headache"></textarea>
+    <div style="height:10px"></div>
+    <input id="place" type="text" placeholder="مثال: الطالبية هرم، الجيزة">
+    <div style="height:10px"></div>
+    <button id="btn-symptoms"><i class="fa-solid fa-robot"></i> ابحث الآن</button>
     <div id="load-sym" class="loader"></div>
-    <div class="helper small">نؤكد أن النتائج إرشادية ولا تغني عن مراجعة الطبيب المختص.</div>
+    <div class="hint" style="margin-top:10px">
+      مثال كتابة: <b>أنا في الجيزة</b> + <b>حاسس بإرهاق عام وصداع شديد</b> — النظام هيفهم السياق ويقترح التخصص المناسب، ويطلع أقرب مقدم خدمة.
+    </div>
   </div>
 
   <!-- تحليل التقارير -->
-  <div class="page" id="reports">
-    <div class="h2"><i class="fa-solid fa-microscope"></i> تحليل التقارير/التحاليل الطبية</div>
-    <div class="sub">ارفع ملفاتك (صور أو PDF)، واكتب مكانك لنرشّح لك التخصص والمقدّم الأقرب.</div>
-
-    <div class="row">
-      <input id="rep-place" class="input" placeholder="مكانك (اختياري لكن مهم للترشيحات: مثال الجيزة)">
-      <input id="rep-files" type="file" multiple accept="image/*,application/pdf" class="input">
-    </div>
-    <button id="btn-analyze" class="btn"><i class="fa-solid fa-file-medical"></i> حلّل التقارير</button>
+  <div class="section">
+    <h2>🧾 تحليل التقارير والتحاليل</h2>
+    <div class="muted">ارفع تقاريرك (أي صيغة: صور/ PDF...) — هنحلّلها ونرشّح تخصص ومقدم خدمة قريب.</div>
+    <div style="height:10px"></div>
+    <input id="rep-place" type="text" placeholder="مكانك — مثال: الجيزة">
+    <div style="height:6px"></div>
+    <input id="rep-files" type="file" multiple>
+    <div style="height:10px"></div>
+    <button id="btn-analyze"><i class="fa-solid fa-file-medical"></i> حلّل التقارير</button>
     <div id="load-ana" class="loader"></div>
   </div>
 
   <!-- مخرجات الذكاء الاصطناعي -->
-  <div id="ai-out" class="page hidden"></div>
+  <div class="section" id="ai-out" style="display:none"></div>
 
   <!-- النتائج -->
-  <div id="results" class="page hidden">
-    <div class="section-title"><i class="fa-solid fa-list-check"></i> النتائج المقترحة</div>
+  <div class="section" id="results" style="display:none">
+    <h3>📋 النتائج المقترحة</h3>
     <div id="cards"></div>
-    <div id="nores" class="center small hidden">لا توجد نتائج مطابقة لبحثك.</div>
   </div>
 
-  <!-- خريطة المقر -->
-  <div class="page footer-map" id="hq">
-    <div class="h2"><i class="fa-solid fa-map-location-dot"></i> المقر الرئيسي</div>
-    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.495955148021!2d31.20786357555355!3d30.02262187493399!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145846e49123862b%3A0x12f5a6396017366d!2sEl%20Gamaa%20Tower!5e0!3m2!1sen!2seg" loading="lazy"></iframe>
+  <!-- المقر الرئيسي -->
+  <div class="section" id="hq">
+    <h2>📍 المقر الرئيسي — الأهلي للخدمات الطبية</h2>
+    <div class="map-wrap" id="hq-map" title="افتح في خرائط Google">
+      <!-- خريطة المقر: 57 برج الجامعة، شارع مراد، ميدان النهضة، الجيزة -->
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.495955148021!2d31.20786357555355!3d30.02262187493399!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145846e49123862b%3A0x12f5a6396017366d!2s57%20El%20Gamaa%20Tower%2C%20Mourad%20St.%20El%20Nahda%20Sq.%2C%20Giza!5e0!3m2!1sen!2seg!4v0000000000000"
+        width="100%" height="320" style="border:0" allowfullscreen="" loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+    <div style="height:6px"></div>
+    <div class="muted">العنوان: 57 برج الجامعة، شارع مراد، ميدان النهضة، الجيزة</div>
   </div>
+
 </div>
 
 <script>
-const iconMap = {
-  "default":"fa-user-doctor","باطنه":"fa-stethoscope","باطنة":"fa-stethoscope","جراحه":"fa-user-doctor","جراحة":"fa-user-doctor",
-  "قلب":"fa-heart-pulse","مخ":"fa-brain","اعصاب":"fa-brain","نساء":"fa-person-pregnant","حمل":"fa-person-pregnant",
-  "اطفال":"fa-child-reaching","عيون":"fa-eye","جلديه":"fa-hand-dots","جلدية":"fa-hand-dots","عظام":"fa-bone",
-  "انف":"fa-head-side-cough","اذن":"fa-head-side-cough","حنجره":"fa-head-side-cough","صدر":"fa-lungs",
-  "مسالك":"fa-toilet-paper","اسنان":"fa-tooth","صيدليه":"fa-pills","صيدلية":"fa-pills",
-  "اشعه":"fa-x-ray","أشعة":"fa-x-ray","معمل":"fa-vial-virus","مستشفى":"fa-hospital","مركز طبي":"fa-house-medical"
-};
-function getIcon(s=""){ s = (s||"").toLowerCase(); for(const k in iconMap){ if(s.includes(k)) return "fa-solid "+iconMap[k]; } return "fa-solid "+iconMap["default"]; }
+  // ===== أيقونات التخصصات (ستايل قديم/بسيط وبروفشنال) =====
+  const iconMap = {
+    "default":"fa-user-doctor",
+    "باطنه":"fa-stethoscope",
+    "قلب":"fa-heart-pulse","قلبيه":"fa-heart-pulse",
+    "صدر":"fa-lungs",
+    "مخ":"fa-brain","اعصاب":"fa-brain",
+    "نساء":"fa-person-pregnant","اطفال":"fa-child-reaching",
+    "عيون":"fa-eye","جلديه":"fa-hand-dots",
+    "عظام":"fa-bone",
+    "انف":"fa-head-side-cough","اذن":"fa-head-side-cough","حنجره":"fa-head-side-cough",
+    "مسالك":"fa-toilet-paper",
+    "اسنان":"fa-tooth",
+    "صيدليه":"fa-pills",
+    "اشعه":"fa-x-ray",
+    "معمل":"fa-vial",
+    "مستشفى":"fa-hospital"
+  };
+  function getIconClass(txt){
+    const s = (txt||"").toLowerCase();
+    for (const k in iconMap) {
+      if (k !== "default" && s.includes(k)) return "fa-solid " + iconMap[k];
+    }
+    return "fa-solid " + iconMap["default"];
+  }
 
-const btnSymptoms = document.getElementById('btn-symptoms');
-const symptomsEl = document.getElementById('symptoms');
-const placeEl = document.getElementById('place');
-const loadSym = document.getElementById('load-sym');
+  // ===== مكوّنات العرض =====
+  function showAI(data){
+    const box = document.getElementById("ai-out");
+    box.style.display = "block";
+    box.innerHTML = `
+      <div><b>💡 الشرح الطبي:</b> ${data.doctor_explanation || data.interpretation || "-"}</div>
+      <div class="divider"></div>
+      <div><b>🩺 التخصص الأنسب:</b> ${data.recommended_specialty || "-"} ${data.resolved_location?`— بالقرب من <b>${data.resolved_location}</b>`:""}</div>
+      <div class="divider"></div>
+      <div><b>📌 نصائح مبدئية:</b>
+        <ul>${(data.temporary_advice||[]).map(x=>`<li>${x}</li>`).join("")}</ul>
+      </div>
+    `;
+  }
 
-const btnAnalyze = document.getElementById('btn-analyze');
-const repPlaceEl = document.getElementById('rep-place');
-const repFilesEl = document.getElementById('rep-files');
-const loadAna = document.getElementById('load-ana');
+  function phonesPills(phones){
+    return (phones||[]).map(p=>`<span class="pill">${p}</span>`).join("");
+  }
 
-const aiOut = document.getElementById('ai-out');
-const results = document.getElementById('results');
-const cards = document.getElementById('cards');
-const nores = document.getElementById('nores');
-
-function showAIBlock({explanation, tips, spec, resolvedLoc}) {
-  const tipsHtml = (tips||[]).map(t=>`<li>${t}</li>`).join('');
-  aiOut.classList.remove('hidden');
-  aiOut.innerHTML = `
-    <div class="ai-card">
-      <div class="helper"><strong>تنبيه مهم:</strong> هذه معلومات إرشادية ولا تغني عن زيارة الطبيب.</div>
-      ${explanation?`<h4>الشرح الطبي</h4><p>${explanation}</p>`:''}
-      ${tipsHtml?`<h4>نصائح أولية</h4><ul>${tipsHtml}</ul>`:''}
-      ${spec?`<h4>التخصص الأنسب</h4><p><strong>${spec}</strong>${resolvedLoc?` — بالقرب من: <strong>${resolvedLoc}</strong>`:''}</p>`:''}
-    </div>
-  `;
-  aiOut.scrollIntoView({behavior:"smooth",block:"start"});
-}
-
-function renderProviders(list) {
-  results.classList.remove('hidden');
-  cards.innerHTML = '';
-  nores.classList.add('hidden');
-  if(!list || !list.length){ nores.classList.remove('hidden'); return; }
-
-  list.forEach(p=>{
-    const icon = getIcon((p.specialty_sub||p.provider_type||""));
-    const phones = (p.phones||[]).map(x=>`<span>${x}</span>`).join('');
-    cards.insertAdjacentHTML('beforeend', `
-      <div class="card ${p.best?'best':''}">
-        ${p.best?`
-          <div class="best-head">
-            <span class="best-badge"><i class="fa-solid fa-thumbs-up"></i> الترشيح الأنسب</span>
-            <div class="stars"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-          </div>`:''}
-        <div class="card-title">
-          <div class="icon"><i class="${icon}"></i></div>
-          <div>
-            <div style="font-weight:800">${p.name||'مقدم خدمة'}</div>
-            <div class="meta">التخصص: ${p.specialty_sub||p.provider_type||'-'} — النوع: ${p.provider_type||'-'}</div>
+  function showProviders(list){
+    const wrap = document.getElementById("cards");
+    wrap.innerHTML = "";
+    document.getElementById("results").style.display = "block";
+    list.forEach(p=>{
+      const ico = getIconClass((p.specialty_sub||"") + " " + (p.provider_type||""));
+      wrap.innerHTML += `
+        <div class="card ${p.best?"best":""}" id="${p.id}">
+          ${p.best?`<div class="badge"><i class="fa-solid fa-star stars"></i> الترشيح الأنسب <span class="stars">★★★★★</span></div>`:""}
+          <div class="row">
+            <div class="icon"><i class="${ico}"></i></div>
+            <div>
+              <div class="title">${p.name||"-"}</div>
+              <div class="small">${(p.specialty_sub||p.provider_type||"-")}</div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div><i class="fa-solid fa-location-dot"></i> ${p.address||"-"} <span class="small">(${p.governorate||"-"})</span></div>
+          <div style="margin-top:6px"><i class="fa-solid fa-phone"></i> ${phonesPills(p.phones)}</div>
+          ${p.hotline?`<div style="margin-top:6px"><i class="fa-solid fa-fire"></i> Hotline: <b>${p.hotline}</b></div>`:""}
+          <div class="divider"></div>
+          <div class="actions">
+            <a href="#search" title="الرجوع لصندوق البحث"><i class="fa-solid fa-arrow-up"></i></a>
+            <a target="_blank" href="${p.maps_url}" title="افتح GPS/خرائط Google"><i class="fa-solid fa-location-arrow"></i></a>
+            <a href="#hq" title="الذهاب إلى خريطة المقر"><i class="fa-solid fa-arrow-down"></i></a>
           </div>
         </div>
-        <div class="block"><i class="fa-solid fa-location-dot"></i><div>العنوان: ${p.address||'-'} <span class="meta">(${p.governorate||'-'})</span></div></div>
-        <div class="block"><i class="fa-solid fa-phone"></i><div class="phones">${phones||'<span>-</span>'}</div></div>
-        ${p.hotline?`<div class="block"><i class="fa-solid fa-fire-extinguisher"></i><div>Hotline: <strong>${p.hotline}</strong></div></div>`:''}
-        <div class="actions">
-          <a href="#search" class="action" title="الرجوع للبحث"><i class="fa-solid fa-arrow-up"></i></a>
-          <a href="${p.maps_url}" class="action map" target="_blank" title="افتح العنوان على الخرائط"><i class="fa-solid fa-location-arrow"></i></a>
-          <a href="#hq" class="action" title="الذهاب لخريطة المقر"><i class="fa-solid fa-arrow-down"></i></a>
-        </div>
-      </div>
-    `);
-  });
-  results.scrollIntoView({behavior:"smooth",block:"start"});
-}
-
-async function doSymptomsSearch(){
-  const symptoms = (symptomsEl.value||'').trim();
-  const location = (placeEl.value||'').trim();
-  if(!symptoms || !location){ alert('اكتب الأعراض والمكان من فضلك.'); return; }
-  aiOut.classList.add('hidden'); results.classList.add('hidden'); cards.innerHTML=''; nores.classList.add('hidden');
-  loadSym.style.display = 'block';
-  try{
-    const r = await fetch('/api/symptoms-search', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ symptoms, location })
+      `;
     });
-    const data = await r.json();
-    loadSym.style.display = 'none';
-    if(data.error){ alert(data.error); return; }
-
-    showAIBlock({
-      explanation: data.doctor_explanation,
-      tips: data.temporary_advice,
-      spec: data.recommended_specialty,
-      resolvedLoc: data.resolved_location
-    });
-    renderProviders(data.providers);
-  }catch(e){
-    loadSym.style.display = 'none';
-    alert('حدث خطأ أثناء البحث.');
-    console.error(e);
+    // نزول تلقائي لأوّل نتيجة بعد البحث
+    if (list.length){ location.hash = "#" + list[0].id; }
   }
-}
 
-async function doAnalyze(){
-  const files = Array.from(repFilesEl.files||[]);
-  if(!files.length){ alert('اختر ملفات للتقييم.'); return; }
-  loadAna.style.display = 'block';
-  aiOut.classList.add('hidden'); results.classList.add('hidden'); cards.innerHTML=''; nores.classList.add('hidden');
+  // ===== استدعاءات API =====
+  document.getElementById("btn-symptoms").onclick = async () => {
+    const s = document.getElementById("symptoms").value.trim();
+    const l = document.getElementById("place").value.trim();
+    if (!s){ alert("من فضلك اكتب الأعراض."); return; }
+    if (!l){ alert("من فضلك اكتب مكانك (مثال: الطالبية هرم، الجيزة)."); return; }
+    document.getElementById("load-sym").style.display = "block";
+    const res = await fetch("/api/symptoms", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({symptoms:s, location:l})
+    });
+    const data = await res.json();
+    document.getElementById("load-sym").style.display = "none";
+    showAI(data);
+    showProviders(data.providers || []);
+  };
 
-  try{
-    const filesPayload = await Promise.all(files.map(async f=>{
+  document.getElementById("btn-analyze").onclick = async () => {
+    const l = document.getElementById("rep-place").value.trim();
+    if (!l){ alert("من فضلك اكتب مكانك (مثال: الجيزة)."); return; }
+    const files = document.getElementById("rep-files").files;
+    if (!files.length){ alert("ارفع ملف أو أكثر للتحليل."); return; }
+    const arr = [];
+    for (const f of files){
       const buf = await f.arrayBuffer();
       const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
-      return { mime_type: f.type||'application/octet-stream', data: b64 };
-    }));
-    const r = await fetch('/api/analyze', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ files: filesPayload, location: (repPlaceEl.value||'').trim() })
+      arr.push({mime_type: f.type || "application/octet-stream", data: b64});
+    }
+    document.getElementById("load-ana").style.display = "block";
+    const res = await fetch("/api/reports", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({files:arr, location:l})
     });
-    const data = await r.json();
-    loadAna.style.display = 'none';
-    if(data.error){ alert(data.error); return; }
+    const data = await res.json();
+    document.getElementById("load-ana").style.display = "none";
+    showAI(data);
+    showProviders(data.providers || []);
+  };
 
-    showAIBlock({
-      explanation: data.interpretation,
-      tips: data.temporary_advice,
-      spec: data.recommended_specialty,
-      resolvedLoc: data.resolved_location
-    });
-    renderProviders(data.providers);
-  }catch(e){
-    loadAna.style.display = 'none';
-    alert('تعذر تحليل التقارير حالياً.');
-    console.error(e);
-  }
-}
-
-btnSymptoms.addEventListener('click', doSymptomsSearch);
-btnAnalyze.addEventListener('click', doAnalyze);
+  // خريطة المقر — فتح GPS عند الضغط
+  document.getElementById("hq-map").onclick = () => {
+    window.open(
+      "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent("57 El Gamaa Tower, Mourad St., El Nahda Sq., Giza, Egypt"),
+      "_blank"
+    );
+  };
 </script>
 </body>
 </html>
