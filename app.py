@@ -22,6 +22,7 @@ def get_network_data():
     وتحفظها في الذاكرة لتسريع الأداء في الطلبات التالية.
     """
     global NETWORK_DATA_CACHE
+    # إذا تم تحميل البيانات من قبل، قم بإرجاعها مباشرة لتسريع الأداء
     if NETWORK_DATA_CACHE is not None:
         return NETWORK_DATA_CACHE
 
@@ -38,8 +39,7 @@ def get_network_data():
         # قراءة البيانات مباشرة من ملف الإكسل، من الشيت المحدد
         df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0)
         
-        # استخدام أسماء الأعمدة من ملف الإكسل مباشرة لتجنب الأخطاء
-        # العمود الأول هو ID، الثاني هو المحافظة، وهكذا.
+        # استخدام أسماء الأعمدة المتوقعة بالترتيب
         df.columns = [
             'id', 'governorate', 'area', 'type', 'specialty_main', 
             'specialty_sub', 'name', 'address', 'phones_1', 'phones_2', 'hotline_str'
@@ -50,11 +50,14 @@ def get_network_data():
 
         data_list = []
         for _, row in df.iterrows():
+            # دمج أرقام الهواتف في قائمة واحدة بعد تنظيفها
             phones = []
-            if row.get('phones_1') and row['phones_1'] != '0': phones.append(row['phones_1'].strip())
-            if row.get('phones_2') and row['phones_2'] != '0': phones.append(row['phones_2'].strip())
+            phone1 = str(row.get('phones_1', '')).replace('.0', '').strip()
+            phone2 = str(row.get('phones_2', '')).replace('.0', '').strip()
+            if phone1 and phone1 != '0': phones.append(phone1)
+            if phone2 and phone2 != '0': phones.append(phone2)
             
-            hotline = row.get('hotline_str', '').replace('.0', '').strip() or None
+            hotline = str(row.get('hotline_str', '')).replace('.0', '').strip() or None
             
             item = {
                 'id': row.get('id'), 'governorate': row.get('governorate'), 'area': row.get('area'),
@@ -72,7 +75,7 @@ def get_network_data():
         app.logger.error(f"حدث خطأ فادح أثناء قراءة ملف الإكسل: {e}", exc_info=True)
         return []
 
-# --- endpoints الخاصة بالتطبيق (تبقى كما هي) ---
+# --- endpoints الخاصة بالتطبيق ---
 @app.route('/')
 def serve_index():
     return send_from_directory('static', 'index.html')
@@ -80,42 +83,73 @@ def serve_index():
 @app.route('/api/network')
 def get_network_data_endpoint():
     data = get_network_data()
+    if not data:
+        app.logger.warning("يتم إرجاع قائمة بيانات فارغة لأن التحميل فشل.")
     return jsonify(data)
 
 def get_available_specialties():
     data = get_network_data()
-    if not data: return '"باطنة", "عظام", "اسنان"'
+    if not data: return '"باطنة", "عظام", "اسنان"' # قائمة افتراضية في حالة الفشل
+    
     specialties = set(item.get('specialty_main', '') for item in data)
     types = set(item.get('type', '') for item in data)
     available_items = sorted(list(specialties.union(types)))
     return ", ".join([f'"{item}"' for item in available_items if item])
 
-# --- باقي دوال الـ API تبقى كما هي تمامًا بدون تغيير ---
-# ... (للتسهيل، سأضعها كاملة)
 @app.route("/api/recommend", methods=["POST"])
 def recommend_specialty():
-    data = request.get_json()
-    symptoms = data.get('symptoms')
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not (symptoms and api_key): return jsonify({"error": "Missing symptoms or API key"}), 400
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]. شكوى المريض: \"{symptoms}\"..." # Prompt مختصر
-    response = model.generate_content(prompt)
-    cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
-    return jsonify(json.loads(cleaned_text))
+    try:
+        data = request.get_json()
+        symptoms = data.get('symptoms')
+        if not symptoms: return jsonify({"error": "Missing symptoms"}), 400
+        
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            app.logger.error("خطأ فادح في recommend API: متغير البيئة GEMINI_API_KEY غير معين.")
+            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
+
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        prompt = f"""
+        أنت مساعد طبي خبير ومحترف في شركة خدمات طبية كبرى. مهمتك هي تحليل شكوى المريض بدقة واقتراح أفضل تخصص طبي من القائمة المتاحة.
+        قائمة التخصصات المتاحة هي: [{get_available_specialties()}]
+        شكوى المريض: "{symptoms}"
+        المطلوب: ردك يجب أن يكون بصيغة JSON فقط يحتوي على:
+        - `recommendations`: قائمة تحتوي على عنصر واحد فقط به "id" (اسم التخصص) و "reason" (سبب الترشيح).
+        - `temporary_advice`: قائمة (array) من ثلاثة (3) أسطر نصائح.
+        """
+        response = model.generate_content(prompt)
+        cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
+        return jsonify(json.loads(cleaned_text))
+    except Exception as e:
+        app.logger.error(f"ERROR in /api/recommend: {e}", exc_info=True)
+        return jsonify({"error": "حدث خطأ داخلي في الخادم."}), 500
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze_report():
-    data = request.get_json()
-    files_data = data.get('files')
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not (files_data and api_key): return jsonify({"error": "Missing files or API key"}), 400
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    file_parts = [{"mime_type": f["mime_type"], "data": base64.b64decode(f["data"])} for f in files_data]
-    prompt = f"أنت محلل تقارير طبية ذكي... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]..." # Prompt مختصر
-    content = [prompt] + file_parts
-    response = model.generate_content(content)
-    cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
-    return jsonify(json.loads(cleaned_text))
+    try:
+        data = request.get_json()
+        files_data = data.get('files')
+        if not files_data: return jsonify({"error": "Missing files"}), 400
+
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            app.logger.error("خطأ فادح في analyze API: متغير البيئة GEMINI_API_KEY غير معين.")
+            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
+
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        file_parts = [{"mime_type": f["mime_type"], "data": base64.b64decode(f["data"])} for f in files_data]
+        prompt = f"""
+        أنت محلل تقارير طبية ذكي. مهمتك تحليل الملفات وتقديم رد بصيغة JSON فقط يحتوي على:
+        1. `interpretation`: شرح مبسط للتقرير. لا تقدم تشخيصاً نهائياً.
+        2. `temporary_advice`: قائمة من 3 نصائح عامة.
+        3. `recommendations`: قائمة تحتوي على تخصص واحد فقط هو الأنسب للحالة من القائمة [{get_available_specialties()}]، مع `id` و `reason`.
+        """
+        content = [prompt] + file_parts
+        response = model.generate_content(content)
+        cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
+        return jsonify(json.loads(cleaned_text))
+    except Exception as e:
+        app.logger.error(f"ERROR in /api/analyze: {e}", exc_info=True)
+        return jsonify({"error": "حدث خطأ غير متوقع."}), 500
