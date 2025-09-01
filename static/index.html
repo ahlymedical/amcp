@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الشبكة الطبية - الأهلي للخدمات الطبية</title>
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary-green: #006A4E;
+        --primary-orange: #F58220;
+        --special-green-teal: #008080;
+        --accent-light-green: #E6F0ED;
+        --white: #ffffff;
+        --light-gray: #f0f2f5;
+        --medium-gray: #e9ecef;
+        --text-dark: #212529;
+        --text-muted: #6c757d;
+        --danger-red: #dc3545;
+        --primary-glow: rgba(0, 106, 78, 0.3);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+        font-family: 'Cairo', sans-serif;
+        background-color: var(--light-gray);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: var(--text-dark);
+        line-height: 1.7;
+    }
+    .logo-container-full-width {
+        width: 100%;
+        background: var(--white);
+        text-align: center;
+        padding: 20px 0;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .logo-image {
+        max-width: 900px;
+        width: 90%;
+        height: auto;
+    }
+    .page {
+        background: var(--white);
+        width: 100%;
+        max-width: 900px;
+        padding: 25px;
+        box-shadow: 0 5px 30px rgba(0,0,0,0.1);
+        border-radius: 15px;
+        box-sizing: border-box;
+        overflow: hidden;
+        margin: 20px 15px;
+    }
+    .info-professional {
+        background-color: var(--accent-light-green);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+        text-align: right;
+        border: 1px solid var(--medium-gray);
+    }
+    .info-professional h1 {
+        font-size: 20px;
+        margin-top: 0;
+        margin-bottom: 5px;
+        color: var(--primary-green);
+    }
+    .info-professional .en-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+        display: block;
+    }
+    .info-professional .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+    .info-item { display: flex; align-items: center; gap: 15px; }
+    .info-item i { font-size: 22px; color: var(--primary-orange); width: 25px; text-align: center; }
+    .info-item-text a { color: var(--text-dark); text-decoration: none; font-weight: 600; }
+    .info-item-text a:hover { color: var(--primary-green); }
+    .info-item-text .en { font-family: 'Poppins', sans-serif; font-size: 0.8em; color: var(--text-muted); display: block; }
+    
+    .feature-box {
+        text-align: right;
+        margin-bottom: 25px;
+        padding: 20px;
+        background-color: var(--accent-light-green);
+        border: 1px solid var(--medium-gray);
+        border-radius: 10px;
+    }
+    .feature-box h2 {
+        font-size: 18px;
+        color: var(--primary-green);
+        margin-top: 0;
+        margin-bottom: 5px;
+    }
+    .feature-box h2 .en-subtitle {
+        font-family: 'Poppins', sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--text-muted);
+        display: block;
+        margin-top: 2px;
+    }
+    .feature-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+    
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    .feature-box select, .feature-box textarea, .feature-box input[type="text"] {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-family: 'Cairo', sans-serif;
+        font-size: 14px;
+        box-sizing: border-box;
+        background-color: var(--white);
+        margin-bottom: 10px;
+    }
+    .feature-box button {
+        background-color: var(--primary-green);
+        color: var(--white);
+        border: none;
+        padding: 12px 25px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        width: 100%;
+        margin-top: 10px;
+    }
+    .feature-box button:hover:not(:disabled) { background-color: #005a41; }
+    .feature-box button:disabled { background-color: #999; cursor: not-allowed; }
+    button.go-to-btn { background-color: var(--primary-orange); color: var(--white); font-weight: 700; }
+    button.go-to-btn:hover { background-color: #d9711c; }
+    
+    #ai-area-search-btn {
+        background-color: var(--special-green-teal);
+    }
+    #ai-area-search-btn:hover:not(:disabled) {
+        background-color: #006666;
+    }
+
+    .loader {
+        border: 4px solid var(--medium-gray);
+        border-top: 4px solid var(--primary-green);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+        display: none;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    .section-title {
+        font-size: 22px;
+        color: var(--primary-green);
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        border-bottom: 3px solid var(--primary-orange);
+    }
+
+    #intermediate-results-container {
+        margin-top: 20px;
+        display: none;
+    }
+    .result-jump-btn {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        background-color: var(--white);
+        border: 1px solid var(--medium-gray);
+        border-radius: 8px;
+        font-family: 'Cairo', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-dark);
+        text-align: right;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .result-jump-btn:hover {
+        background-color: var(--primary-green);
+        color: var(--white);
+        border-color: var(--primary-green);
+    }
+
+    #network-container { margin-top: 30px; }
+    .provider-card {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 2px solid transparent;
+        transition: all 0.3s;
+        padding: 15px;
+        background-color: var(--white);
+    }
+    .provider-card:target {
+        border-color: var(--primary-orange);
+        box-shadow: 0 4px 15px rgba(245, 130, 32, 0.4);
+    }
+    .provider-name { font-size: 17px; font-weight: 700; color: var(--primary-green); }
+    .provider-details, .provider-contact { display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--text-muted); }
+    .provider-details span, .provider-contact span { display: flex; align-items: flex-start; gap: 10px; }
+    .provider-details i, .provider-contact i { color: var(--primary-orange); width: 16px; text-align: center; margin-top: 4px; }
+    .provider-contact span { font-family: 'Poppins', sans-serif; font-weight: 600; letter-spacing: 0.5px; }
+    
+    .provider-nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 15px;
+        padding-top: 10px;
+        border-top: 1px solid var(--medium-gray);
+    }
+    .nav-btn {
+        background-color: var(--accent-light-green);
+        border: 1px solid var(--medium-gray);
+        color: var(--primary-green);
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .nav-btn:hover {
+        background-color: var(--primary-green);
+        color: var(--white);
+        transform: scale(1.1);
+    }
+
+    #no-results {
+        text-align: center;
+        padding: 40px 20px;
+        background-color: var(--accent-light-green);
+        border-radius: 8px;
+        color: var(--text-muted);
+        font-weight: 600;
+        display: none;
+    }
+    .ai-result-area { margin-top: 20px; }
+    
+    .recommendation-card { background-color: var(--white); border: 1px solid #ddd; border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: right; transition: all 0.3s ease; }
+    .recommendation-card.primary-recommendation { border: 2px solid var(--primary-green); box-shadow: 0 0 20px var(--primary-glow); }
+    .recommendation-header { display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+    .recommendation-header .icon { 
+        width: 48px; height: 48px; 
+        display: flex; align-items: center; justify-content: center; 
+        position: relative; overflow: hidden;
+    }
+    .recommendation-header .icon.animated { animation: pulse 1.5s infinite ease-in-out; }
+    .recommendation-header .icon.animated::after {
+        content: ''; position: absolute; top: -50%; left: -60%; width: 20%; height: 200%;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+        transform: rotate(35deg); animation: sheen 3s infinite;
+    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    @keyframes sheen { 0% { left: -60%; } 100% { left: 140%; } }
+
+    .recommendation-header .icon .fa-solid { font-size: 28px; color: var(--primary-green); }
+    .recommendation-header h3 { margin: 0; font-size: 20px; color: var(--text-dark); }
+    .recommendation-badge { background-color: var(--primary-green); color: white; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 12px; margin-right: auto; }
+    .recommendation-reason { font-size: 15px; line-height: 1.8; color: var(--text-muted); margin-bottom: 15px; text-align: justify; }
+
+    .analysis-card { background-color: var(--white); border: 2px solid var(--primary-green); box-shadow: 0 0 20px var(--primary-glow); border-radius: 10px; padding: 20px; text-align: right; }
+    .analysis-card .disclaimer { background-color: #fff3cd; border-right: 5px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    .analysis-card .disclaimer strong { color: #856404; }
+    .analysis-section-title { font-size: 18px; font-weight: 700; color: var(--primary-green); margin-top: 20px; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 2px solid var(--primary-orange); }
+    .analysis-card ul { padding-right: 20px; margin: 0; }
+    .analysis-card li { margin-bottom: 10px; line-height: 1.8; }
+    .find-provider-section { margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--medium-gray); }
+    .find-provider-section p { font-weight: 600; color: var(--text-dark); }
+
+    .upload-area { border: 2px dashed #ccc; border-radius: 10px; padding: 20px; margin-bottom: 15px; transition: border-color 0.3s, background-color 0.3s; }
+    .upload-area.drag-over { border-color: var(--primary-green); background-color: var(--accent-light-green); }
+    #report-files-input { display: none; }
+    .upload-label { display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); text-align: center; }
+    .upload-label i { font-size: 36px; margin-bottom: 10px; color: var(--primary-green); }
+    .upload-label span { font-size: 16px; font-weight: 600; }
+    #file-preview-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; justify-content: center; }
+    .preview-item { position: relative; width: 80px; height: 80px; }
+    .preview-item .file-icon { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; background-color: var(--light-gray); border-radius: 8px; border: 1px solid #ddd; }
+    .preview-item .file-icon i { font-size: 30px; color: var(--primary-green); }
+    .preview-item .file-icon span { font-size: 10px; color: var(--text-muted); margin-top: 5px; word-break: break-all; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-align: center; }
+    .remove-file-btn { position: absolute; top: -5px; right: -5px; width: 20px; height: 20px; background-color: var(--danger-red); color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; z-index: 1; }
+
+    .location-section { margin-top: 40px; text-align: center; }
+    .location-section h2 { font-size: 20px; color: var(--primary-green); margin-bottom: 15px; }
+    .location-map { position: relative; width: 100%; height: 300px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+    .location-map iframe { width: 100%; height: 100%; border: 0; }
+    .location-address { margin-top: 15px; font-size: 16px; color: var(--text-muted); line-height: 1.7; }
+
+</style>
+</head>
+<body>
+
+<div class="logo-container-full-width">
+    <img src="https://i.ibb.co/JFMjRLSf/Cover-Linkedin-AMC-new.png" alt="AMC Logo" class="logo-image">
+</div>
+
+<div class="page" id="page-top">
+    
+    <div class="info-professional">
+        <h1>دليل مقدمي الخدمة الطبية <span class="en-title">Medical Network Directory</span></h1>
+        <div class="info-grid">
+            <div class="info-item">
+                <i class="fa-solid fa-phone"></i>
+                <div class="info-item-text">الخط الساخن: <strong>19462</strong> <span class="en">HOTLINE</span></div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-globe"></i>
+                <div class="info-item-text"><a href="https://www.ahlymedical.com/" target="_blank">www.ahlymedical.com</a> <span class="en">Our Website</span></div>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-map-marker-alt"></i>
+                <div class="info-item-text"> 57 برج الجامعة، شارع مراد، الجيزة <span class="en">57 El Gamaa Tower, Mourad St, Giza</span> </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Network Search -->
+    <div class="feature-box" id="search-box">
+        <h2> <i class="fa-solid fa-magnifying-glass"></i> البحث المتقدم في الشبكة الطبية <span class="en-subtitle">Advanced Network Search</span></h2>
+        <div class="filter-grid">
+            <select id="governorate-filter">
+                <option value="">كل المحافظات / All Governorates</option>
+            </select>
+            <select id="type-filter">
+                <option value="">نوع مقدم الخدمة / Provider Type</option>
+            </select>
+            <select id="specialty-main-filter">
+                <option value="">التخصص الرئيسي / Main Specialty</option>
+            </select>
+            <select id="specialty-sub-filter">
+                <option value="">التخصص الفرعي / Sub-specialty</option>
+            </select>
+        </div>
+        <button id="provider-search-btn"><i class="fa-solid fa-search"></i> ابحث / Search</button>
+    </div>
+
+    <!-- AI Tools Section -->
+    <div class="feature-box">
+        <h2><i class="fa-solid fa-robot"></i> استخدم المساعد الذكي <span class="en-subtitle">AI Assistant Tools</span></h2>
+        <p>صف الأعراض، ارفع تقاريرك، أو ابحث مباشرة عن خدمة في منطقتك ليقوم المساعد الذكي بمساعدتك.</p>
+        
+        <textarea id="symptoms-input" placeholder="اكتب الأعراض هنا... / Describe your symptoms here..."></textarea>
+        <button id="get-recommendation-btn">✨ أرشدني بناءً على الأعراض / Guide Me</button>
+        <div id="loader-symptoms" class="loader"></div>
+        <div id="recommendation-result-area" class="ai-result-area"></div>
+        
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid var(--medium-gray);">
+        
+        <div class="upload-area" id="upload-area">
+            <input type="file" id="report-files-input" multiple accept="image/png, image/jpeg, image/webp, application/pdf">
+            <label for="report-files-input" class="upload-label">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>اختر ملفات التقارير أو اسحبها إلى هنا <br> <small>(Choose or drag & drop your reports)</small></span>
+            </label>
+        </div>
+        <div id="file-preview-container"></div>
+        <button id="analyze-reports-btn" disabled><i class="fa-solid fa-microscope"></i> حلل التقارير / Analyze Reports</button>
+        <div id="loader-analysis" class="loader"></div>
+        <div id="analysis-result-area" class="ai-result-area"></div>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 1px solid var(--medium-gray);">
+
+        <input type="text" id="ai-area-input" placeholder="اكتب المنطقة هنا... / Enter Area...">
+        <textarea id="ai-service-input" placeholder="اكتب الخدمة المطلوبة... (مثال: صيدلية أو دكتور عظام) / Describe the service... (e.g., pharmacy or orthopedic doctor)"></textarea>
+        <button id="ai-area-search-btn"><i class="fa-solid fa-magnifying-glass-location"></i> ابحث بالمنطقة والخدمة / Search by Area & Service</button>
+        <div id="loader-area-search" class="loader"></div>
+
+    </div>
+
+    <!-- Search Results Content -->
+    <div id="intermediate-results-container"></div>
+    <div id="network-container"></div>
+    <div id="no-results">
+        <i class="fa-solid fa-box-open" style="font-size: 40px; margin-bottom: 15px;"></i>
+        <p>لا توجد نتائج مطابقة لبحثك. <br> <small>No results found matching your criteria.</small></p>
+    </div>
+    
+    <!-- Map Section -->
+    <div class="location-section" id="location-section">
+        <h2> <i class="fa-solid fa-map-location-dot"></i> موقعنا على الخريطة <br> <small class="en-subtitle" style="color: var(--text-muted)">Our Location on Map</small></h2>
+        <div class="location-map">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.495955148021!2d31.20786357555355!3d30.02262187493399!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145846e49123862b%3A0x12f5a6396017366d!2sEl%20Gamaa%20Tower!5e0!3m2!1sen!2seg" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        <p class="location-address">57 برج الجامعة، شارع مراد، الجيزة</p>
+    </div>
+    
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function() {
+    
+    let networkData = [];
+
+    const specialtyIcons = {
+        'default': 'fa-solid fa-user-doctor',
+        'باطنة': 'fa-solid fa-stethoscope',
+        'علاج طبيعي': 'fa-solid fa-person-walking',
+        'اسنان': 'fa-solid fa-tooth',
+        'صيدلية': 'fa-solid fa-pills',
+        'قلب واوعية دموية': 'fa-solid fa-heart-pulse',
+        'جراحة مخ وأعصاب': 'fa-solid fa-brain',
+        'معمل': 'fa-solid fa-vial-virus',
+        'أشعة': 'fa-solid fa-x-ray',
+        'نساء وتوليد': 'fa-solid fa-person-pregnant',
+        'اطفال': 'fa-solid fa-child-reaching',
+        'عظام': 'fa-solid fa-bone',
+        'جلدية': 'fa-solid fa-hand-dots',
+        'انف واذن وحنجرة': 'fa-solid fa-head-side-cough',
+        'عيون': 'fa-solid fa-eye',
+        'صدرية': 'fa-solid fa-lungs',
+        'جراحة عامة': 'fa-solid fa-user-doctor-hair',
+        'مسالك بولية': 'fa-solid fa-toilet-paper',
+        'مستشفى': 'fa-solid fa-hospital',
+        'مركز طبي': 'fa-solid fa-house-medical',
+        'بصريات': 'fa-solid fa-glasses'
+    };
+
+    function getIconForSpecialty(specialty) {
+        for (const key in specialtyIcons) {
+            if (specialty.toLowerCase().includes(key.toLowerCase())) {
+                return specialtyIcons[key];
+            }
+        }
+        return specialtyIcons['default'];
+    }
+    
+    const governorateFilter = document.getElementById('governorate-filter');
+    const typeFilter = document.getElementById('type-filter');
+    const specialtyMainFilter = document.getElementById('specialty-main-filter');
+    const specialtySubFilter = document.getElementById('specialty-sub-filter');
+    const searchBtn = document.getElementById('provider-search-btn');
+    const intermediateResultsContainer = document.getElementById('intermediate-results-container');
+    const networkContainer = document.getElementById('network-container');
+    const noResultsDiv = document.getElementById('no-results');
+
+    async function loadNetworkData() {
+        try {
+            const response = await fetch('/api/network');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            networkData = await response.json();
+            console.log(`تم تحميل ${networkData.length} سجل من الشبكة الطبية.`);
+            initFilters();
+        } catch (error) {
+            console.error("فشل تحميل بيانات الشبكة:", error);
+            alert("حدث خطأ أثناء تحميل بيانات الشبكة الطبية. يرجى إعادة تحميل الصفحة.");
+        }
+    }
+
+    function populateSelect(selectElement, values) {
+        const currentVal = selectElement.value;
+        selectElement.innerHTML = selectElement.options[0].outerHTML;
+        const fragment = document.createDocumentFragment();
+        values.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            fragment.appendChild(option);
+        });
+        selectElement.appendChild(fragment);
+        selectElement.value = currentVal;
+    }
+
+    function updateDependentFilters() {
+        let filteredData = networkData;
+        if (governorateFilter.value) filteredData = filteredData.filter(p => p.governorate === governorateFilter.value);
+        
+        const availableTypes = [...new Set(filteredData.map(p => p.type))].sort();
+        populateSelect(typeFilter, availableTypes);
+
+        if (typeFilter.value) filteredData = filteredData.filter(p => p.type === typeFilter.value);
+        
+        const availableMains = [...new Set(filteredData.map(p => p.specialty_main))].sort();
+        populateSelect(specialtyMainFilter, availableMains);
+
+        if (specialtyMainFilter.value) filteredData = filteredData.filter(p => p.specialty_main === specialtyMainFilter.value);
+
+        const availableSubs = [...new Set(filteredData.map(p => p.specialty_sub))].sort();
+        populateSelect(specialtySubFilter, availableSubs);
+    }
+
+    function initFilters() {
+        populateSelect(governorateFilter, [...new Set(networkData.map(p => p.governorate))].sort());
+        updateDependentFilters();
+        governorateFilter.addEventListener('change', updateDependentFilters);
+        typeFilter.addEventListener('change', updateDependentFilters);
+        specialtyMainFilter.addEventListener('change', updateDependentFilters);
+    }
+    
+    function renderResults(results) {
+        intermediateResultsContainer.innerHTML = '';
+        networkContainer.innerHTML = '';
+        noResultsDiv.style.display = results.length === 0 ? 'block' : 'none';
+        intermediateResultsContainer.style.display = results.length > 0 ? 'block' : 'none';
+
+        if (results.length > 0) {
+            const title = document.createElement('h2');
+            title.className = 'section-title';
+            title.textContent = 'نتائج البحث: اختر لعرض التفاصيل';
+            intermediateResultsContainer.appendChild(title);
+
+            const buttonFragment = document.createDocumentFragment();
+            const cardFragment = document.createDocumentFragment();
+
+            results.forEach(provider => {
+                const providerCardId = `provider-${provider.id.replace(/[^a-zA-Z0-9]/g, '-')}`;
+
+                const button = document.createElement('button');
+                button.className = 'result-jump-btn';
+                button.dataset.targetId = `#${providerCardId}`;
+                button.innerHTML = `<span>${provider.name}</span> <i class="fa-solid fa-arrow-down"></i>`;
+                buttonFragment.appendChild(button);
+
+                const card = document.createElement('div');
+                card.className = 'provider-card';
+                card.id = providerCardId;
+                
+                let phonesHTML = provider.phones && provider.phones.length > 0 ? provider.phones.filter(p => p).map(phone => `<span><i class="fa-solid fa-phone"></i> ${phone}</span>`).join('') : '';
+                let hotlineHTML = provider.hotline ? `<span><i class="fa-solid fa-headset"></i> ${provider.hotline}</span>` : '';
+
+                card.innerHTML = `
+                    <div class="provider-name">${provider.name}</div>
+                    <div class="provider-details">
+                        <span><i class="fa-solid fa-location-dot"></i> ${provider.address}</span>
+                        <span><i class="fa-solid fa-tag"></i> ${provider.type} / ${provider.specialty_main} / ${provider.specialty_sub}</span>
+                    </div>
+                    <div class="provider-contact">${phonesHTML}${hotlineHTML}</div>
+                    <div class="provider-nav">
+                        <button class="nav-btn nav-btn-up" title="العودة للبحث"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button class="nav-btn nav-btn-down" title="الذهاب للخريطة"><i class="fa-solid fa-arrow-down"></i></button>
+                    </div>
+                `;
+                cardFragment.appendChild(card);
+            });
+
+            intermediateResultsContainer.appendChild(buttonFragment);
+            networkContainer.appendChild(cardFragment);
+        }
+    }
+    
+    searchBtn.addEventListener('click', () => {
+        const results = networkData.filter(p => 
+            (!governorateFilter.value || p.governorate === governorateFilter.value) &&
+            (!typeFilter.value || p.type === typeFilter.value) &&
+            (!specialtyMainFilter.value || p.specialty_main === specialtyMainFilter.value) &&
+            (!specialtySubFilter.value || p.specialty_sub === specialtySubFilter.value)
+        );
+        renderResults(results);
+    });
+
+    await loadNetworkData();
+    
+    // AI Functionality
+    const getRecommendationBtn = document.getElementById('get-recommendation-btn');
+    const symptomsInput = document.getElementById('symptoms-input');
+    const recommendationResultArea = document.getElementById('recommendation-result-area');
+    const loaderSymptoms = document.getElementById('loader-symptoms');
+
+    const analyzeBtn = document.getElementById('analyze-reports-btn');
+    const analysisResultArea = document.getElementById('analysis-result-area');
+    const loaderAnalysis = document.getElementById('loader-analysis');
+
+    const aiAreaInput = document.getElementById('ai-area-input');
+    const aiServiceInput = document.getElementById('ai-service-input');
+    const aiAreaSearchBtn = document.getElementById('ai-area-search-btn');
+    const loaderAreaSearch = document.getElementById('loader-area-search');
+    
+    async function handleAISymptoms() {
+        const symptomsText = symptomsInput.value.trim();
+        if (!symptomsText) { alert('من فضلك، قم بوصف الأعراض التي تشعر بها.'); return; }
+        
+        loaderSymptoms.style.display = 'block';
+        recommendationResultArea.innerHTML = '';
+        getRecommendationBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/recommend', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symptoms: symptomsText })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'فشل الاتصال بالخادم.');
+            }
+
+            const result = await response.json();
+            const rec = result.recommendations[0];
+            const specialty = rec.id;
+            const iconClass = getIconForSpecialty(specialty);
+            
+            const findProviderSectionHTML = `<div class="find-provider-section"><p>للعثور على مقدم خدمة مناسب، يرجى اختيار المنطقة:</p><select class="ai-governorate-select"><option value="">اختر المنطقة / Select Area</option>${[...new Set(networkData.map(p => p.governorate))].sort().map(g => `<option value="${g}">${g}</option>`).join('')}</select><button class="go-to-btn find-provider-btn" data-specialty="${specialty}">ابحث عن مقدمي الخدمة</button></div>`;
+            
+            recommendationResultArea.innerHTML = `<div class="recommendation-card primary-recommendation"><div class="recommendation-header"><div class="icon animated"><i class="${iconClass}"></i></div><h3>${specialty}</h3><span class="recommendation-badge">الترشيح الأنسب</span></div><p class="recommendation-reason">${rec.reason}</p>${findProviderSectionHTML}</div>`;
+        } catch (error) {
+            recommendationResultArea.innerHTML = `<p style="color:var(--danger-red);">عفواً، حدث خطأ تقني: ${error.message}</p>`;
+        } finally {
+            loaderSymptoms.style.display = 'none';
+            getRecommendationBtn.disabled = false;
+        }
+    }
+
+    async function handleAIAnalysis() {
+        if (uploadedFiles.length === 0) {
+            alert('يرجى اختيار ملف واحد على الأقل لتحليله.');
+            return;
+        }
+        
+        loaderAnalysis.style.display = 'block';
+        analysisResultArea.innerHTML = '';
+        analyzeBtn.disabled = true;
+
+        try {
+            const filesPayload = await Promise.all(uploadedFiles.map(file => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => {
+                        resolve({
+                            mime_type: file.type,
+                            data: reader.result.split(',')[1] // Get base64 part
+                        });
+                    };
+                    reader.onerror = error => reject(error);
+                });
+            }));
+
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ files: filesPayload })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'فشل الاتصال بالخادم.');
+            }
+
+            const result = await response.json();
+            const rec = result.recommendations[0];
+            const specialty = rec.id;
+            const iconClass = getIconForSpecialty(specialty);
+            const findProviderSectionHTML = `<div class="find-provider-section"><p>للعثور على مقدم خدمة مناسب، يرجى اختيار المنطقة:</p><select class="ai-governorate-select"><option value="">اختر المنطقة / Select Area</option>${[...new Set(networkData.map(p => p.governorate))].sort().map(g => `<option value="${g}">${g}</option>`).join('')}</select><button class="go-to-btn find-provider-btn" data-specialty="${specialty}">ابحث عن مقدمي الخدمة</button></div>`;
+            
+            analysisResultArea.innerHTML = `<div class="analysis-card"><div class="disclaimer"><i class="fa-solid fa-triangle-exclamation"></i> <strong>تنبيه هام:</strong> هذا التحليل هو مجرد إرشاد أولي ولا يغني عن استشارة الطبيب.</div><h3 class="analysis-section-title">شرح مبدئي للتقرير</h3><p>${result.interpretation}</p><h3 class="analysis-section-title">نصائح وإرشادات مؤقتة</h3><ul>${result.temporary_advice.map(item => `<li>${item}</li>`).join('')}</ul><h3 class="analysis-section-title">التخصص الموصى به</h3><div class="recommendation-card"><div class="recommendation-header"><div class="icon animated"><i class="${iconClass}"></i></div><h3>${specialty}</h3></div><p class="recommendation-reason">${rec.reason}</p></div>${findProviderSectionHTML}</div>`;
+
+        } catch (error) {
+            analysisResultArea.innerHTML = `<p style="color:var(--danger-red);">عفواً، حدث خطأ تقني: ${error.message}</p>`;
+        } finally {
+            loaderAnalysis.style.display = 'none';
+            analyzeBtn.disabled = uploadedFiles.length === 0;
+        }
+    }
+
+    async function handleAreaSearch() {
+        const areaQuery = aiAreaInput.value.trim().toLowerCase();
+        const serviceQuery = aiServiceInput.value.trim().toLowerCase();
+
+        if (!areaQuery || !serviceQuery) {
+            alert('يرجى إدخال المنطقة والخدمة المطلوبة.');
+            return;
+        }
+
+        loaderAreaSearch.style.display = 'block';
+        renderResults([]); 
+
+        // Simulate a small delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const serviceKeywords = serviceQuery.split(' ').filter(k => k.length > 1);
+
+        const results = networkData.filter(provider => {
+            const areaMatch = provider.governorate.toLowerCase().includes(areaQuery) || provider.area.toLowerCase().includes(areaQuery);
+            if (!areaMatch) return false;
+
+            const providerInfoString = `${provider.type} ${provider.specialty_main} ${provider.specialty_sub} ${provider.name}`.toLowerCase();
+            return serviceKeywords.some(keyword => providerInfoString.includes(keyword));
+        });
+
+        renderResults(results);
+        if (results.length > 0) {
+            intermediateResultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+        loaderAreaSearch.style.display = 'none';
+    }
+
+    getRecommendationBtn.addEventListener('click', handleAISymptoms);
+    analyzeBtn.addEventListener('click', handleAIAnalysis);
+    aiAreaSearchBtn.addEventListener('click', handleAreaSearch);
+
+    document.body.addEventListener('click', function(event) {
+        const jumpButton = event.target.closest('.result-jump-btn');
+        if (jumpButton) {
+            const targetId = jumpButton.dataset.targetId;
+            document.querySelector(targetId).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        if (event.target.classList.contains('find-provider-btn')) {
+            const specialty = event.target.dataset.specialty;
+            const selectElement = event.target.closest('.find-provider-section').querySelector('.ai-governorate-select');
+            if (!selectElement.value) { alert('يرجى اختيار المنطقة أولاً.'); return; }
+            const results = networkData.filter(p => p.governorate === selectElement.value && (p.specialty_main.toLowerCase().includes(specialty.toLowerCase()) || p.type.toLowerCase().includes(specialty.toLowerCase())));
+            renderResults(results);
+            intermediateResultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+        if (event.target.closest('.nav-btn-up')) document.getElementById('search-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (event.target.closest('.nav-btn-down')) document.getElementById('location-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    // File Upload Handling
+    const uploadArea = document.getElementById('upload-area');
+    const fileInput = document.getElementById('report-files-input');
+    const previewContainer = document.getElementById('file-preview-container');
+    let uploadedFiles = [];
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => uploadArea.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false));
+    ['dragenter', 'dragover'].forEach(eventName => uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-over'), false));
+    ['dragleave', 'drop'].forEach(eventName => uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-over'), false));
+    uploadArea.addEventListener('drop', e => handleFiles(e.dataTransfer.files), false);
+    fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+    function handleFiles(files) {
+        [...files].forEach(file => uploadedFiles.push(file));
+        renderPreviews();
+    }
+    function renderPreviews() {
+        previewContainer.innerHTML = '';
+        uploadedFiles.forEach((file, index) => {
+            const item = document.createElement('div');
+            item.className = 'preview-item';
+            let iconClass = file.type.startsWith('image/') ? 'fa-solid fa-file-image' : (file.type.includes('pdf') ? 'fa-solid fa-file-pdf' : 'fa-solid fa-file');
+            item.innerHTML = `<div class="file-icon"><i class="${iconClass}"></i><span>${file.name}</span></div><button class="remove-file-btn" data-index="${index}">&times;</button>`;
+            previewContainer.appendChild(item);
+        });
+        analyzeBtn.disabled = uploadedFiles.length === 0;
+    }
+    previewContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-file-btn')) {
+            uploadedFiles.splice(parseInt(e.target.dataset.index, 10), 1);
+            renderPreviews();
+        }
+    });
+});
+</script>
+
+</body>
+</html>
