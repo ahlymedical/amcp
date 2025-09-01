@@ -4,7 +4,6 @@ import pandas as pd
 import os
 
 # المسار إلى الملف الذي يحتوي على بيانات الشبكة
-# تأكد من وجود مجلد 'network_data_files' وبداخله ملف 'sheet001.htm'
 HTML_FILE_PATH = os.path.join('network_data_files', 'sheet001.htm')
 OUTPUT_JSON_PATH = os.path.join('static', 'network_data.json')
 
@@ -17,20 +16,24 @@ def convert_html_to_json():
 
     if not os.path.exists(HTML_FILE_PATH):
         print(f"خطأ: لم يتم العثور على الملف '{HTML_FILE_PATH}'.")
-        print("يرجى التأكد من أنك قمت بفك ضغط ملف 'network_data.htm' ووضعت مجلد 'network_data_files' في نفس مسار هذا السكربت.")
+        print("يرجى التأكد من وجود مجلد 'network_data_files' في نفس مسار هذا السكربت.")
         return
 
     # قراءة محتوى الملف مع تحديد الترميز الصحيح
     with open(HTML_FILE_PATH, 'r', encoding='windows-1256') as f:
         html_content = f.read()
 
-    # استخدام pandas لقراءة جدول HTML مباشرة وهو الأسهل والأكثر دقة
+    # استخدام pandas لقراءة جدول HTML
     try:
         df_list = pd.read_html(html_content, header=0)
         df = df_list[0]
     except Exception as e:
         print(f"حدث خطأ أثناء قراءة ملف HTML باستخدام pandas: {e}")
         return
+        
+    # <<< هذا هو السطر الجديد الذي يحل المشكلة >>>
+    # يقوم باختيار أول 10 أعمدة فقط ويتجاهل أي أعمدة إضافية قد تكون فارغة
+    df = df.iloc[:, :10]
 
     # إعادة تسمية الأعمدة لتكون باللغة الإنجليزية ليسهل التعامل معها
     df.columns = [
@@ -38,25 +41,23 @@ def convert_html_to_json():
         'specialty_sub', 'name', 'address', 'phones_str', 'hotline_str'
     ]
     
-    # إزالة الصفوف التي لا تحتوي على ID (غالبًا تكون صفوف فارغة أو ترويسات مكررة)
+    # إزالة الصفوف التي لا تحتوي على ID
     df.dropna(subset=['id'], inplace=True)
 
-    # تحويل البيانات إلى القائمة المطلوبة من القواميس (dictionaries)
+    # تحويل البيانات إلى القائمة المطلوبة
     data_list = []
     for _, row in df.iterrows():
         # تقسيم أرقام الهواتف وتنقيتها
         phones = []
         if pd.notna(row['phones_str']):
             try:
-                # التحويل إلى سلسلة نصية لضمان عمل الدالة split
                 phones = [p.strip() for p in str(row['phones_str']).split('/') if p.strip()]
             except:
-                phones = [] # في حالة وجود خطأ، اجعلها قائمة فارغة
+                phones = []
         
         # تنقية رقم الخط الساخن
         hotline = None
         if pd.notna(row['hotline_str']):
-             # تحويل الرقم إلى سلسلة نصية وتنقيتها
             hotline_val = str(row['hotline_str']).replace('.0', '').strip()
             if hotline_val.isdigit():
                  hotline = hotline_val
