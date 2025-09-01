@@ -25,8 +25,8 @@ def get_network_data():
         return NETWORK_DATA_CACHE
 
     basedir = os.path.abspath(os.path.dirname(__file__))
-    # <<< هذا هو السطر الذي تم تصحيحه بشكل نهائي >>>
-    excel_file_path = os.path.join(basedir, 'network_data_files', 'network_data.xlsx')
+    # <<< هذا هو السطر الذي تم تصحيحه بشكل نهائي ليتناسب مع تعديلك >>>
+    excel_file_path = os.path.join(basedir, 'network_data.xlsx')
     
     app.logger.info(f"محاولة قراءة ملف الإكسل من المسار الصحيح: {excel_file_path}")
 
@@ -37,9 +37,7 @@ def get_network_data():
     try:
         df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0)
         
-        # قراءة الأعمدة بناءً على الترتيب لضمان المرونة
         num_columns = len(df.columns)
-        
         df.dropna(subset=[df.columns[0]], inplace=True)
         df = df.astype(str).replace('nan', '')
 
@@ -86,26 +84,20 @@ def get_network_data_endpoint():
 def get_available_specialties():
     data = get_network_data()
     if not data: return '"باطنة", "عظام", "اسنان"'
-    
     specialties = set(item.get('specialty_main', '') for item in data)
     types = set(item.get('type', '') for item in data)
     available_items = sorted(list(specialties.union(types)))
     return ", ".join([f'"{item}"' for item in available_items if item])
 
 # --- باقي دوال الـ API تبقى كما هي تمامًا بدون تغيير ---
-# (سأضعها كاملة لسهولة النسخ)
 @app.route("/api/recommend", methods=["POST"])
 def recommend_specialty():
     try:
         data = request.get_json()
         symptoms = data.get('symptoms')
         if not symptoms: return jsonify({"error": "Missing symptoms"}), 400
-        
         api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            app.logger.error("خطأ فادح في recommend API: متغير البيئة GEMINI_API_KEY غير معين.")
-            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
-
+        if not api_key: return jsonify({"error": "Server configuration error."}), 500
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         prompt = f"أنت مساعد طبي خبير... قائمة التخصصات المتاحة هي: [{get_available_specialties()}]. شكوى المريض: \"{symptoms}\"..."
@@ -122,12 +114,8 @@ def analyze_report():
         data = request.get_json()
         files_data = data.get('files')
         if not files_data: return jsonify({"error": "Missing files"}), 400
-
         api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key:
-            app.logger.error("خطأ فادح في analyze API: متغير البيئة GEMINI_API_KEY غير معين.")
-            return jsonify({"error": "خطأ في إعدادات الخادم."}), 500
-
+        if not api_key: return jsonify({"error": "Server configuration error."}), 500
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         file_parts = [{"mime_type": f["mime_type"], "data": base64.b64decode(f["data"])} for f in files_data]
