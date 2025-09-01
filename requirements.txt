@@ -2,6 +2,7 @@ Flask
 gunicorn
 flask-cors
 google-generativeai
-beautifulsoup4
 pandas
 lxml
+beautifulsoup4
+openpyxl
