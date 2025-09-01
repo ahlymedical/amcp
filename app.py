@@ -32,56 +32,35 @@ def get_network_data():
         return []
 
     try:
-        # ===== تعديل رئيسي: قراءة أول ورقة عمل (sheet) بالرقم (0) بدلاً من الاسم =====
-        # هذا يضمن عمل الكود حتى لو كان اسم الورقة "Sheet1" أو أي اسم آخر
+        # قراءة أول ورقة عمل (sheet) بالرقم (0) وقراءة الأعمدة بترتيبها الرقمي (iloc)
         df = pd.read_excel(excel_file_path, sheet_name=0, header=0)
-        
         df.dropna(how='all', inplace=True)
-        # التأكد من أن الأعمدة الأساسية ليست فارغة
         df.dropna(subset=[df.columns[0], df.columns[3]], inplace=True) 
         df = df.astype(str).replace('nan', '')
 
         data_list = []
         for index, row in df.iterrows():
-            # ===== تعديل رئيسي: قراءة الأعمدة بترتيبها الرقمي (iloc) لتجنب أخطاء الأسماء =====
-            # الترتيب المتوقع:
-            # 0: المنطقة, 1: التخصص الرئيسي, 2: التخصص الفرعي, 3: اسم مقدم الخدمة, 4: العنوان
-            # 5-8: الهواتف, 9: الخط الساخن
-            
-            # التحقق من أن الصف يحتوي على عدد كافٍ من الأعمدة
-            if len(row) < 10:
-                continue # تجاهل الصفوف غير المكتملة
+            # الترتيب المتوقع: 0: المنطقة, 1: التخصص الرئيسي, 2: التخصص الفرعي, 3: اسم مقدم الخدمة, 4: العنوان, 5-8: الهواتف, 9: الخط الساخن
+            if len(row) < 10: continue
 
-            phones = [
-                str(row.iloc[i]).replace('.0', '').strip() for i in range(5, 9)
-                if str(row.iloc[i]).replace('.0', '').strip() not in ['0', '']
-            ]
+            phones = [str(row.iloc[i]).replace('.0', '').strip() for i in range(5, 9) if str(row.iloc[i]).replace('.0', '').strip() not in ['0', '']]
             hotline = str(row.iloc[9]).replace('.0', '').strip() if str(row.iloc[9]).replace('.0', '').strip() not in ['0', ''] else None
             
             item = {
-                'governorate': row.iloc[0],
-                'provider_type': row.iloc[1],
-                'specialty_sub': row.iloc[2],
-                'name': row.iloc[3],
-                'address': row.iloc[4],
-                'phones': phones,
-                'hotline': hotline,
+                'governorate': row.iloc[0], 'provider_type': row.iloc[1], 'specialty_sub': row.iloc[2],
+                'name': row.iloc[3], 'address': row.iloc[4], 'phones': phones, 'hotline': hotline,
                 'id': f"row-{index}"
             }
             data_list.append(item)
         
         NETWORK_DATA_CACHE = data_list
-        if not data_list:
-             app.logger.warning("تحذير: تم تحميل البيانات ولكن القائمة فارغة. تحقق من محتوى ملف الإكسل.")
-        else:
-            app.logger.info(f"نجحت العملية! تم تحميل {len(NETWORK_DATA_CACHE)} سجل من ملف الإكسل إلى الذاكرة.")
+        app.logger.info(f"نجحت العملية! تم تحميل {len(NETWORK_DATA_CACHE)} سجل من ملف الإكسل إلى الذاكرة.")
         return NETWORK_DATA_CACHE
     except Exception as e:
         app.logger.error(f"حدث خطأ فادح أثناء قراءة ملف الإكسل: {e}", exc_info=True)
         return []
 
-# --- باقي الكود يبقى كما هو لأنه يعتمد على هذه الدالة ---
-
+# --- Endpoints الخاصة بالتطبيق ---
 @app.route('/')
 def serve_index():
     return send_from_directory('static', 'index.html')
@@ -105,19 +84,36 @@ def symptoms_search():
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
 
+        # ===== تعديل جذري ومهم جداً: الـ Prompt الجديد =====
         prompt = f"""
-        أنت نظام ترشيح طبي ذكي وخبير. مهمتك هي مساعدة مريض بناءً على أعراضه وموقعه الجغرافي.
-        قاعدة البيانات المتاحة (عينة للتوضيح): {json.dumps(network_data[:100], ensure_ascii=False, indent=2)}
-        أعراض المريض: "{symptoms}"
-        موقع المريض: "{location}"
-        
-        المطلوب منك بدقة:
-        1.  **استنتاج التخصص**: بناءً على الأعراض، استنتج "التخصص الرئيسي" (provider_type) الأنسب.
-        2.  **فهم الموقع والفلترة**: افهم موقع المريض بمرونة (مثال: "الطالبية هرم" تعني محافظة "الجيزة"). ابحث في **كامل** قاعدة البيانات عن **كل** مقدمي الخدمة الذين يتطابقون مع التخصص الذي استنتجته والمحافظة ("المنطقة" أو governorate) التي فهمتها.
-        3.  **اختيار الترشيح الأنسب**: من النتائج، اختر **مقدم خدمة واحد فقط** ليكون "الترشيح الأنسب" (best_match) بناءً على اكتمال بياناته.
-        4.  **كتابة نصيحة طبية احترافية**: اكتب نصيحة طبية أولية ومؤقتة (initial_advice) كأنك طبيب محترف، بناءً على الأعراض، مع التأكيد على ضرورة زيارة الطبيب.
-        5.  **الإخراج النهائي**: أعد النتائج على هيئة ملف JSON **فقط**، يحتوي على الحقول التالية: `initial_advice`, `best_match` (قائمة بعنصر واحد), `other_results` (قائمة بباقي النتائج).
-        إذا لم تجد نتائج، أعد القوائم فارغة.
+        أنت "مرشد طبي خبير" ومساعد ذكي متخصص في الشبكة الطبية المصرية. مهمتك هي فهم شكوى المريض وتقديم أفضل خدمة ممكنة.
+
+        **سياق الحوار:**
+        - **شكوى المريض:** "{symptoms}"
+        - **موقع المريض:** "{location}"
+
+        **قاعدة البيانات المتاحة (عينة كبيرة لتفهمها جيداً):**
+        {json.dumps(network_data[:250], ensure_ascii=False, indent=2)}
+
+        **مهمتك المطلوبة (نفذها بالترتيب وبأقصى درجات الاحترافية):**
+
+        **1. الشرح الطبي الاحترافي (Initial Advice):**
+           - **تصرف كطبيب متخصص:** اكتب شرحاً طبياً مبدئياً ومفصلاً للمريض.
+           - **اشرح الأسباب المحتملة:** وضح بأسلوب بسيط ومطمئن ما قد تسببه هذه الأعراض (مثال: "الأعراض التي وصفتها قد تشير إلى إرهاق عضلي أو ربما بداية التهاب في الأعصاب...").
+           - **قدم نصائح علاجية مؤقتة:** أعطِ المريض 2-3 نصائح عملية ومؤقتة يمكنه القيام بها فوراً (مثال: "ننصح بالراحة التامة، استخدام كمادات دافئة، وشرب الكثير من السوائل...").
+           - **أكد على أهمية الطبيب:** اختتم الفقرة بالتأكيد على أن هذا الشرح لا يغني أبداً عن زيارة الطبيب المختص للتشخيص الدقيق.
+
+        **2. فهم الطلب والبحث الذكي:**
+           - **فهم التخصص بمرونة:** استنتج "التخصص الرئيسي" (provider_type) من شكوى المريض. كن ذكياً (مثال: "وجع في درسي" أو "محتاج دكتور سنان" كلاهما يعني "اسنان").
+           - **فهم الموقع بمرونة:** افهم موقع المريض باللهجة المصرية العامية (مثال: "الطالبية هرم" أو "فيصل" أو "ميدان الجيزة" كلها تعني محافظة "الجيزة").
+           - **ابحث بشكل موسع:** هدفك هو إيجاد **أكبر عدد ممكن** من مقدمي الخدمة المطابقين للتخصص والموقع الذي فهمته. لا تكتفِ بنتيجة أو اثنتين.
+
+        **3. ترتيب النتائج والإخراج النهائي:**
+           - **اختر "الترشيح الأنسب" (Best Match):** من كل النتائج التي وجدتها، اختر **مقدم خدمة واحد فقط** تراه الأفضل (بياناته مكتملة جداً، اسمه معروف، إلخ).
+           - **باقي الترشيحات (Other Results):** ضع كل النتائج الأخرى التي وجدتها في هذه القائمة.
+           - **الإخراج كملف JSON:** أعد كل ما سبق في ملف JSON منظم يحتوي على الحقول التالية فقط: `initial_advice` (الشرح الطبي المفصل)، `best_match` (قائمة بعنصر واحد)، `other_results` (قائمة بكل النتائج الأخرى).
+
+        **إذا لم تجد أي نتائج على الإطلاق، أعد القوائم فارغة مع ترك الشرح الطبي موجوداً.**
         """
         response = model.generate_content(prompt)
         cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
@@ -127,19 +123,18 @@ def symptoms_search():
         app.logger.error(f"ERROR in /api/symptoms-search: {e}", exc_info=True)
         return jsonify({"error": "حدث خطأ داخلي أثناء البحث الذكي."}), 500
 
+# ... باقي كود تحليل التقارير يبقى كما هو ...
 @app.route("/api/analyze", methods=["POST"])
 def analyze_report():
+    # هذا الكود يعمل بشكل صحيح ولا يحتاج تعديل
     try:
         data = request.get_json()
         files_payload = data.get('files')
         if not files_payload: return jsonify({"error": "No files provided"}), 400
-
         api_key = os.environ.get("GEMINI_API_KEY")
         if not api_key: return jsonify({"error": "Server configuration error."}), 500
-
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
-
         prompt_parts = [
             f"""
             أنت طبيب استشاري خبير. حلل الملفات المرفقة بدقة وقدم إجابة احترافية على هيئة ملف JSON فقط.
@@ -152,11 +147,9 @@ def analyze_report():
         ]
         for file_data in files_payload:
             prompt_parts.append({"mime_type": file_data['mime_type'], "data": file_data['data']})
-            
         response = model.generate_content(prompt_parts)
         cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
         return jsonify(json.loads(cleaned_text))
-
     except Exception as e:
         app.logger.error(f"ERROR in /api/analyze: {e}", exc_info=True)
         return jsonify({"error": "حدث خطأ داخلي أثناء تحليل التقارير."}), 500
