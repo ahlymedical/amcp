@@ -317,13 +317,12 @@
     .location-map { position: relative; width: 100%; height: 300px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
     .location-map iframe { width: 100%; height: 100%; border: 0; }
     .location-address { margin-top: 15px; font-size: 16px; color: var(--text-muted); line-height: 1.7; }
-
+    
     /* --- بداية التعديل المطلوب --- */
     #specialty-sub-filter {
-        grid-column: 1 / -1; /* تجعل العنصر يمتد على عرض الشبكة بالكامل */
+        grid-column: 1 / -1;
     }
     /* --- نهاية التعديل المطلوب --- */
-
 </style>
 </head>
 <body>
@@ -417,7 +416,7 @@
     <div class="location-section" id="location-section">
         <h2> <i class="fa-solid fa-map-location-dot"></i> موقعنا على الخريطة <br> <small class="en-subtitle" style="color: var(--text-muted)">Our Location on Map</small></h2>
         <div class="location-map">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.495955148021!2d31.20786357555355!3d30.02262187493399!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145846e49123862b%3A0x12f5a6396017366d!2sEl%20Gamaa%20Tower!5e0!3m2!1sen!2seg" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3454.495955148021!2d31.20786357555355!3d30.02262187493399!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145846e49123862b%3A0x12f5a6gamaa%20Tower!5e0!3m2!1sen!2seg" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
         <p class="location-address">57 برج الجامعة، شارع مراد، الجيزة</p>
     </div>
@@ -481,7 +480,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             networkData = await response.json();
             if (!Array.isArray(networkData) || networkData.length === 0) {
                 console.error("البيانات المستلمة ليست مصفوفة أو أنها فارغة.");
-                alert("لم يتم تحميل بيانات الشبكة بنجاح. قد تكون هناك مشكلة في المصدر.");
+                alert("لم يتم تحميل بيانات الشبكة بنجاح. قد تكون هناك مشكلة في المصدر. يرجى مراجعة سجلات الخادم (Logs).");
                 return;
             }
             console.log(`تم تحميل ${networkData.length} سجل من الشبكة الطبية.`);
@@ -494,7 +493,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function populateSelect(selectElement, values) {
         const currentVal = selectElement.value;
-        const filteredValues = values.filter(v => v && v.trim() !== ''); // تجاهل القيم الفارغة
+        const filteredValues = values.filter(v => v && v.trim() !== '' && v.trim() !== 'nan'); 
         selectElement.innerHTML = selectElement.options[0].outerHTML;
         const fragment = document.createDocumentFragment();
         [...new Set(filteredValues)].sort().forEach(value => {
@@ -509,15 +508,21 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     function updateDependentFilters() {
         let filteredData = networkData;
-        if (governorateFilter.value) filteredData = filteredData.filter(p => p.governorate === governorateFilter.value);
+        if (governorateFilter.value) {
+            filteredData = filteredData.filter(p => p.governorate === governorateFilter.value);
+        }
         
         populateSelect(typeFilter, filteredData.map(p => p.type));
 
-        if (typeFilter.value) filteredData = filteredData.filter(p => p.type === typeFilter.value);
+        if (typeFilter.value) {
+            filteredData = filteredData.filter(p => p.type === typeFilter.value);
+        }
         
         populateSelect(specialtyMainFilter, filteredData.map(p => p.specialty_main));
 
-        if (specialtyMainFilter.value) filteredData = filteredData.filter(p => p.specialty_main === specialtyMainFilter.value);
+        if (specialtyMainFilter.value) {
+            filteredData = filteredData.filter(p => p.specialty_main === specialtyMainFilter.value);
+        }
 
         populateSelect(specialtySubFilter, filteredData.map(p => p.specialty_sub));
     }
@@ -564,8 +569,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 card.innerHTML = `
                     <div class="provider-name">${provider.name}</div>
                     <div class="provider-details">
-                        <span><i class="fa-solid fa-location-dot"></i> ${provider.address}</span>
-                        <span><i class="fa-solid fa-tag"></i> ${provider.type} / ${provider.specialty_main} / ${provider.specialty_sub}</span>
+                        <span><i class="fa-solid fa-location-dot"></i> ${provider.address || 'غير متوفر'}</span>
+                        <span><i class="fa-solid fa-tag"></i> ${provider.type || ''} / ${provider.specialty_main || ''} / ${provider.specialty_sub || ''}</span>
                     </div>
                     <div class="provider-contact">${phonesHTML}${hotlineHTML}</div>
                     <div class="provider-nav">
@@ -708,13 +713,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         loaderAreaSearch.style.display = 'block';
         renderResults([]); 
 
-        // Simulate a small delay for better UX
         await new Promise(resolve => setTimeout(resolve, 500));
 
         const serviceKeywords = serviceQuery.split(' ').filter(k => k.length > 1);
 
         const results = networkData.filter(provider => {
-            const areaMatch = provider.governorate.toLowerCase().includes(areaQuery) || provider.area.toLowerCase().includes(areaQuery);
+            const areaMatch = (provider.governorate || '').toLowerCase().includes(areaQuery) || (provider.area || '').toLowerCase().includes(areaQuery);
             if (!areaMatch) return false;
 
             const providerInfoString = `${provider.type} ${provider.specialty_main} ${provider.specialty_sub} ${provider.name}`.toLowerCase();
@@ -742,7 +746,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const specialty = event.target.dataset.specialty;
             const selectElement = event.target.closest('.find-provider-section').querySelector('.ai-governorate-select');
             if (!selectElement.value) { alert('يرجى اختيار المنطقة أولاً.'); return; }
-            const results = networkData.filter(p => p.governorate === selectElement.value && (p.specialty_main.toLowerCase().includes(specialty.toLowerCase()) || p.type.toLowerCase().includes(specialty.toLowerCase())));
+            const results = networkData.filter(p => p.governorate === selectElement.value && ((p.specialty_main || '').toLowerCase().includes(specialty.toLowerCase()) || (p.type || '').toLowerCase().includes(specialty.toLowerCase())));
             renderResults(results);
             intermediateResultsContainer.scrollIntoView({ behavior: 'smooth' });
         }
