@@ -18,12 +18,12 @@ NETWORK_DATA_CACHE = None
 def get_network_data():
     """
     تقوم بقراءة بيانات الشبكة من ملف الإكسل مرة واحدة فقط وتحفظها في الذاكرة لضمان السرعة.
+    تم تعديل هذه الدالة لتكون أكثر قوة في قراءة البيانات.
     """
     global NETWORK_DATA_CACHE
     if NETWORK_DATA_CACHE is not None:
         return NETWORK_DATA_CACHE
 
-    # التأكد من أن الملف يُقرأ من المجلد الرئيسي للمشروع
     basedir = os.path.abspath(os.path.dirname(__file__))
     excel_file_path = os.path.join(basedir, 'network_data.xlsx')
     
@@ -32,29 +32,38 @@ def get_network_data():
         return []
 
     try:
-        # قراءة الأعمدة المطلوبة فقط بأسمائها العربية كما طلبت
-        df = pd.read_excel(excel_file_path, sheet_name='network_data', header=0, usecols=[
-            'المنطقة', 'التخصص الرئيسي', 'التخصص الفرعي', 'اسم مقدم الخدمة', 
-            'عنوان مقدم الخدمة', 'Telephone1', 'Telephone2', 'Telephone3', 'Telephone4', 'Hotline'
-        ])
+        # ===== تعديل رئيسي: قراءة أول ورقة عمل (sheet) بالرقم (0) بدلاً من الاسم =====
+        # هذا يضمن عمل الكود حتى لو كان اسم الورقة "Sheet1" أو أي اسم آخر
+        df = pd.read_excel(excel_file_path, sheet_name=0, header=0)
+        
         df.dropna(how='all', inplace=True)
-        df.dropna(subset=['المنطقة', 'اسم مقدم الخدمة'], inplace=True)
+        # التأكد من أن الأعمدة الأساسية ليست فارغة
+        df.dropna(subset=[df.columns[0], df.columns[3]], inplace=True) 
         df = df.astype(str).replace('nan', '')
 
         data_list = []
         for index, row in df.iterrows():
+            # ===== تعديل رئيسي: قراءة الأعمدة بترتيبها الرقمي (iloc) لتجنب أخطاء الأسماء =====
+            # الترتيب المتوقع:
+            # 0: المنطقة, 1: التخصص الرئيسي, 2: التخصص الفرعي, 3: اسم مقدم الخدمة, 4: العنوان
+            # 5-8: الهواتف, 9: الخط الساخن
+            
+            # التحقق من أن الصف يحتوي على عدد كافٍ من الأعمدة
+            if len(row) < 10:
+                continue # تجاهل الصفوف غير المكتملة
+
             phones = [
-                str(row[col]).replace('.0', '').strip() for col in ['Telephone1', 'Telephone2', 'Telephone3', 'Telephone4']
-                if col in row and str(row[col]).replace('.0', '').strip() not in ['0', '']
+                str(row.iloc[i]).replace('.0', '').strip() for i in range(5, 9)
+                if str(row.iloc[i]).replace('.0', '').strip() not in ['0', '']
             ]
-            hotline = str(row['Hotline']).replace('.0', '').strip() if 'Hotline' in row and str(row['Hotline']).replace('.0', '').strip() not in ['0', ''] else None
+            hotline = str(row.iloc[9]).replace('.0', '').strip() if str(row.iloc[9]).replace('.0', '').strip() not in ['0', ''] else None
             
             item = {
-                'governorate': row['المنطقة'],
-                'provider_type': row['التخصص الرئيسي'],
-                'specialty_sub': row['التخصص الفرعي'],
-                'name': row['اسم مقدم الخدمة'],
-                'address': row['عنوان مقدم الخدمة'],
+                'governorate': row.iloc[0],
+                'provider_type': row.iloc[1],
+                'specialty_sub': row.iloc[2],
+                'name': row.iloc[3],
+                'address': row.iloc[4],
                 'phones': phones,
                 'hotline': hotline,
                 'id': f"row-{index}"
@@ -62,13 +71,17 @@ def get_network_data():
             data_list.append(item)
         
         NETWORK_DATA_CACHE = data_list
-        app.logger.info(f"نجحت العملية! تم تحميل {len(NETWORK_DATA_CACHE)} سجل من ملف الإكسل إلى الذاكرة.")
+        if not data_list:
+             app.logger.warning("تحذير: تم تحميل البيانات ولكن القائمة فارغة. تحقق من محتوى ملف الإكسل.")
+        else:
+            app.logger.info(f"نجحت العملية! تم تحميل {len(NETWORK_DATA_CACHE)} سجل من ملف الإكسل إلى الذاكرة.")
         return NETWORK_DATA_CACHE
     except Exception as e:
         app.logger.error(f"حدث خطأ فادح أثناء قراءة ملف الإكسل: {e}", exc_info=True)
         return []
 
-# --- Endpoints الخاصة بالتطبيق ---
+# --- باقي الكود يبقى كما هو لأنه يعتمد على هذه الدالة ---
+
 @app.route('/')
 def serve_index():
     return send_from_directory('static', 'index.html')
@@ -149,5 +162,5 @@ def analyze_report():
         return jsonify({"error": "حدث خطأ داخلي أثناء تحليل التقارير."}), 500
 
 if __name__ == '__main__':
-    get_network_data() # تحميل البيانات في الذاكرة عند بدء التشغيل لضمان السرعة
+    get_network_data()
     app.run(debug=True, port=5000)
