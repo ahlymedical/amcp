@@ -60,57 +60,8 @@ def get_network_data():
 def serve_index():
     return send_from_directory('static', 'index.html')
 
-@app.route("/api/ai-search", methods=["POST"])
-def ai_search():
-    """
-    Endpoint البحث الذكي الجديد الذي يفهم اللغة الطبيعية ويرشح الأفضل.
-    """
-    try:
-        data = request.get_json()
-        query = data.get('query')
-        if not query: return jsonify({"error": "Query is missing"}), 400
-
-        network_data = get_network_data()
-        if not network_data: return jsonify({"error": "Network data not available"}), 500
-        
-        api_key = os.environ.get("GEMINI_API_KEY")
-        if not api_key: return jsonify({"error": "Server configuration error."}), 500
-
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-
-        prompt = f"""
-        أنت محرك بحث طبي ذكي ومساعد خبير. مهمتك تحليل طلب المستخدم وإرجاع قائمة بمقدمي الخدمة المناسبين من قاعدة البيانات المتوفرة.
-
-        قاعدة البيانات (بتنسيق JSON):
-        {json.dumps(network_data[:200], ensure_ascii=False, indent=2)}
-
-        طلب المستخدم: "{query}"
-
-        المطلوب منك:
-        1.  حلل طلب المستخدم لفهم الخدمة المطلوبة (مثال: "دكتور عظام"، "صيدلية"، "معمل تحاليل") والموقع الجغرافي (مثال: "الهرم"، "الطالبية"، "مصر الجديدة").
-        2.  ابحث في قاعدة البيانات عن **كل** مقدمي الخدمة الذين يتطابقون مع الخدمة والموقع المطلوبين. كن مرنًا في البحث، فـ "الطالبية" تقع في "الهرم" وهي جزء من محافظة "الجيزة".
-        3.  من النتائج التي وجدتها، اختر **مقدم خدمة واحد فقط** ليكون "الترشيح الأنسب". يمكنك اختيار الأنسب بناءً على اكتمال بياناته أو شهرة اسمه.
-        4.  أعد النتائج على هيئة ملف JSON **فقط**، بدون أي نصوص قبله أو بعده، ويجب أن يحتوي على الحقول التالية:
-            - `best_match`: قائمة تحتوي على **عنصر واحد فقط** وهو "الترشيح الأنسب".
-            - `other_results`: قائمة تحتوي على **باقي** النتائج المطابقة.
-        
-        إذا لم تجد أي نتائج، أعد قائمة best_match و other_results فارغتين.
-        """
-
-        response = model.generate_content(prompt)
-        cleaned_text = response.text.strip().replace("```json", "").replace("```", "")
-        return jsonify(json.loads(cleaned_text))
-        
-    except Exception as e:
-        app.logger.error(f"ERROR in /api/ai-search: {e}", exc_info=True)
-        return jsonify({"error": "حدث خطأ داخلي في الخادم."}), 500
-
 @app.route("/api/symptoms-search", methods=["POST"])
 def symptoms_search():
-    """
-    Endpoint جديد للبحث بالأعراض والموقع.
-    """
     try:
         data = request.get_json()
         symptoms = data.get('symptoms')
@@ -127,22 +78,23 @@ def symptoms_search():
         model = genai.GenerativeModel('gemini-1.5-flash')
 
         prompt = f"""
-        أنت نظام ترشيح طبي ذكي. مهمتك هي مساعدة مريض بناءً على أعراضه وموقعه.
+        أنت نظام ترشيح طبي ذكي وخبير. مهمتك هي مساعدة مريض بناءً على أعراضه وموقعه الجغرافي.
 
-        قاعدة البيانات (بتنسيق JSON):
-        {json.dumps(network_data[:200], ensure_ascii=False, indent=2)}
+        قاعدة البيانات المتاحة (عينة بتنسيق JSON):
+        {json.dumps(network_data[:150], ensure_ascii=False, indent=2)}
 
         أعراض المريض: "{symptoms}"
         موقع المريض: "{location}"
         
-        المطلوب منك:
-        1.  استنتج التخصص الطبي الأنسب للأعراض (مثال: "اسنان"، "عظام"، "باطنة").
-        2.  ابحث في قاعدة البيانات عن **كل** مقدمي الخدمة من هذا التخصص في الموقع الذي حدده المريض.
-        3.  من النتائج، اختر **مقدم خدمة واحد فقط** ليكون "الترشيح الأنسب".
-        4.  أعد النتائج على هيئة ملف JSON **فقط** ويجب أن يحتوي على:
-            - `suggested_specialty`: (String) اسم التخصص الذي استنتجته.
-            - `best_match`: قائمة بعنصر واحد هو "الترشيح الأنسب".
-            - `other_results`: قائمة بباقي النتائج.
+        المطلوب منك تنفيذ المهام التالية بدقة:
+        1.  **استنتاج التخصص**: بناءً على الأعراض، استنتج "نوع مقدم الخدمة" (provider_type) الأنسب. كن دقيقًا (مثال: "ارهاق وصداع" قد يكون "باطنة" أو "مخ وأعصاب").
+        2.  **البحث والفلترة**: ابحث في **كامل** قاعدة البيانات عن **كل** مقدمي الخدمة الذين يتطابقون مع التخصص الذي استنتجته والموقع الذي حدده المريض (governorate). كن مرنًا في فهم الموقع.
+        3.  **الترشيح الأنسب**: من النتائج التي وجدتها، اختر **مقدم خدمة واحد فقط** ليكون "الترشيح الأنسب" (best_match). اختره بناءً على اكتمال بياناته (وجود هواتف وعنوان واضح) أو شهرة اسمه.
+        4.  **النصيحة الأولية**: اكتب نصيحة طبية احترافية ومؤقتة للمريض (initial_advice) بناءً على الأعراض، مع التأكيد على ضرورة زيارة الطبيب.
+        5.  **الإخراج**: أعد النتائج على هيئة ملف JSON **فقط**، بدون أي نصوص قبله أو بعده، ويجب أن يحتوي على الحقول التالية:
+            - `initial_advice`: (String) النصيحة الطبية المؤقتة.
+            - `best_match`: قائمة تحتوي على **عنصر واحد فقط** وهو "الترشيح الأنسب".
+            - `other_results`: قائمة تحتوي على **باقي** النتائج المطابقة.
 
         إذا لم تجد أي نتائج، أعد القوائم فارغة.
         """
@@ -151,10 +103,9 @@ def symptoms_search():
         return jsonify(json.loads(cleaned_text))
     except Exception as e:
         app.logger.error(f"ERROR in /api/symptoms-search: {e}", exc_info=True)
-        return jsonify({"error": "حدث خطأ داخلي في الخادم."}), 500
-
+        return jsonify({"error": "حدث خطأ داخلي."}), 500
 
 @app.route("/api/analyze", methods=["POST"])
 def analyze_report():
-    # ... (هذا الكود يبقى كما هو) ...
+    # ... (هذا الكود يبقى كما هو دون تغيير) ...
     pass
